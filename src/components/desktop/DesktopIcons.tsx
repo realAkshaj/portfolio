@@ -1,15 +1,42 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { useWindowStore, WindowId } from "@/store/window-store";
 import { desktopIcons } from "@/data/portfolio";
+
+interface IconPosition {
+  x: number;
+  y: number;
+}
 
 export function DesktopIcons() {
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
   const openWindow = useWindowStore((s) => s.openWindow);
   const booted = useWindowStore((s) => s.booted);
 
+  const positionsRef = useRef<Record<string, IconPosition>>({});
+  const [, forceRender] = useState(0);
+  const dragging = useRef<{ id: string; offsetX: number; offsetY: number } | null>(null);
+  const hasMoved = useRef(false);
+  const initialized = useRef(false);
+
+  // Initialize positions once
+  useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+    const initial: Record<string, IconPosition> = {};
+    desktopIcons.forEach((icon, i) => {
+      initial[icon.id] = {
+        x: window.innerWidth - 120,
+        y: 45 + i * 115,
+      };
+    });
+    positionsRef.current = initial;
+    forceRender((n) => n + 1);
+  }, []);
+
+  // Deselect on background click
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (!(e.target as HTMLElement).closest(".desktop-icon")) {
@@ -20,38 +47,120 @@ export function DesktopIcons() {
     return () => document.removeEventListener("click", handleClick);
   }, []);
 
-  if (!booted) return null;
+  // Global move/end listeners — use RAF to throttle updates
+  useEffect(() => {
+    let rafId: number | null = null;
+    let pendingX = 0;
+    let pendingY = 0;
+    let pendingId: string | null = null;
+
+    const applyMove = () => {
+      rafId = null;
+      if (!pendingId) return;
+      positionsRef.current = {
+        ...positionsRef.current,
+        [pendingId]: { x: pendingX, y: pendingY },
+      };
+      forceRender((n) => n + 1);
+    };
+
+    const onMove = (e: MouseEvent | TouchEvent) => {
+      if (!dragging.current) return;
+      const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+      const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+      hasMoved.current = true;
+
+      pendingId = dragging.current.id;
+      pendingX = clientX - dragging.current.offsetX;
+      pendingY = clientY - dragging.current.offsetY;
+
+      if (!rafId) {
+        rafId = requestAnimationFrame(applyMove);
+      }
+    };
+
+    const onEnd = () => {
+      dragging.current = null;
+      pendingId = null;
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+    };
+
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onEnd);
+    document.addEventListener("touchmove", onMove, { passive: false });
+    document.addEventListener("touchend", onEnd);
+
+    return () => {
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onEnd);
+      document.removeEventListener("touchmove", onMove);
+      document.removeEventListener("touchend", onEnd);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  const onDragStart = useCallback(
+    (id: string, e: React.MouseEvent | React.TouchEvent) => {
+      const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+      const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+      const pos = positionsRef.current[id];
+      if (!pos) return;
+      hasMoved.current = false;
+      dragging.current = {
+        id,
+        offsetX: clientX - pos.x,
+        offsetY: clientY - pos.y,
+      };
+      setSelectedIcon(id);
+    },
+    []
+  );
+
+  if (!booted || Object.keys(positionsRef.current).length === 0) return null;
 
   return (
-    <div className="absolute right-4 top-10 z-[100] flex flex-col gap-2 md:right-5">
-      {desktopIcons.map((icon, index) => (
-        <motion.div
-          key={icon.id}
-          className="desktop-icon"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 + index * 0.08, duration: 0.3 }}
-        >
-          <button
-            onClick={() => setSelectedIcon(icon.id)}
-            onDoubleClick={() => openWindow(icon.id as WindowId)}
-            className={`flex w-[76px] flex-col items-center gap-1 rounded-lg p-2 transition-all md:w-[90px] ${
-              selectedIcon === icon.id ? "bg-accent-blue/15" : "hover:bg-white/[0.06]"
-            }`}
+    <>
+      {desktopIcons.map((icon, index) => {
+        const pos = positionsRef.current[icon.id];
+        if (!pos) return null;
+        return (
+          <motion.div
+            key={icon.id}
+            className="desktop-icon absolute z-[100]"
+            style={{ left: pos.x, top: pos.y }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3 + index * 0.08, duration: 0.3 }}
           >
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className={`flex h-12 w-12 items-center justify-center rounded-[14px] bg-gradient-to-br shadow-lg md:h-14 md:w-14 ${icon.gradient}`}
+            <button
+              onMouseDown={(e) => {
+                e.preventDefault();
+                onDragStart(icon.id, e);
+              }}
+              onTouchStart={(e) => onDragStart(icon.id, e)}
+              onDoubleClick={() => openWindow(icon.id as WindowId)}
+              onClick={() => {
+                if (!hasMoved.current) setSelectedIcon(icon.id);
+              }}
+              className={`flex w-[90px] flex-col items-center gap-1.5 rounded-lg p-2 transition-colors ${
+                selectedIcon === icon.id ? "bg-accent-blue/15" : "hover:bg-white/[0.06]"
+              }`}
             >
-              <span className="text-2xl md:text-[28px]">{icon.emoji}</span>
-            </motion.div>
-            <span className="text-center text-[10px] leading-tight text-text drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)] md:text-[11px]">
-              {icon.label}
-            </span>
-          </button>
-        </motion.div>
-      ))}
-    </div>
+              <div
+                className={`flex h-14 w-14 items-center justify-center rounded-[14px] bg-gradient-to-br shadow-lg ${icon.gradient}`}
+              >
+                <span className="text-[28px]">{icon.emoji}</span>
+              </div>
+              <span className="text-center text-[11px] leading-tight text-text drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
+                {icon.label}
+              </span>
+            </button>
+          </motion.div>
+        );
+      })}
+    </>
   );
 }

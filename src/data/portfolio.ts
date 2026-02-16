@@ -169,6 +169,8 @@ export const desktopIcons = [
   { id: "experience" as const, label: "Experience", emoji: "💼", gradient: "from-[#fab387] to-[#f9e2af]" },
   { id: "education" as const, label: "Education", emoji: "🎓", gradient: "from-[#f38ba8] to-[#eb6f92]" },
   { id: "contact" as const, label: "Contact", emoji: "✉️", gradient: "from-[#94e2d5] to-[#89dceb]" },
+  { id: "resume" as const, label: "Resume", emoji: "📄", gradient: "from-[#f5c2e7] to-[#cba6f7]" },
+  { id: "terminal" as const, label: "Terminal", emoji: "💻", gradient: "from-[#a6adc8] to-[#585b70]" },
 ];
 
 export const dockItems = desktopIcons.map((icon) => ({ ...icon }));
