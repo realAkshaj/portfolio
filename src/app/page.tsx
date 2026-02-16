@@ -9,6 +9,7 @@ import { Dock } from "@/components/desktop/Dock";
 import { CommandPalette } from "@/components/desktop/CommandPalette";
 import { ContextMenu } from "@/components/desktop/ContextMenu";
 import { Notifications } from "@/components/desktop/Notifications";
+import { DesktopWidgets } from "@/components/desktop/DesktopWidgets";
 import { Window } from "@/components/ui/Window";
 import { AboutContent } from "@/components/windows/AboutContent";
 import { ProjectsContent } from "@/components/windows/ProjectsContent";
@@ -77,6 +78,7 @@ export default function Home() {
         />
         <DesktopIcons />
         <Notifications />
+        <DesktopWidgets />
 
         <Window id="about" title="About Me"><AboutContent /></Window>
         <Window id="projects" title="Projects — ~/dev"><ProjectsContent /></Window>
