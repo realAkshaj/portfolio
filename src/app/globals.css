@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  ::selection {
+    background: rgba(137, 180, 250, 0.3);
+    color: #cdd6f4;
+  }
+
+  html, body {
+    overflow: hidden;
+    height: 100%;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  }
+
+  *::-webkit-scrollbar { width: 6px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 3px; }
+  *::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.18); }
+}
+
+.wallpaper {
+  background: linear-gradient(135deg, #16213e 0%, #0f3460 40%, #533483 100%);
+}
+
+.wallpaper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 20%, rgba(137, 180, 250, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 80%, rgba(203, 166, 247, 0.06) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.wallpaper-grid {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+
+.glass {
+  background: rgba(30, 30, 46, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.glass-heavy {
+  background: rgba(30, 30, 46, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.window-shadow {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.window-shadow-active {
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(137, 180, 250, 0.15);
+}
+
+.dock-shadow {
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
