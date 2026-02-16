@@ -14,7 +14,10 @@ export type WindowId =
   | "skills"
   | "experience"
   | "education"
-  | "contact";
+  | "contact"
+  | "game"
+  | "resume"
+  | "terminal";
 
 interface WindowStore {
   windows: Record<WindowId, WindowState>;
@@ -25,6 +28,7 @@ interface WindowStore {
   toggleMaximize: (id: WindowId) => void;
   focusWindow: (id: WindowId) => void;
   updatePosition: (id: WindowId, x: number, y: number) => void;
+  updateSize: (id: WindowId, width: number, height: number) => void;
   setBoot: (booted: boolean) => void;
 }
 
@@ -52,6 +56,18 @@ const defaultWindows: Record<WindowId, WindowState> = {
   contact: {
     isOpen: false, isMaximized: false, zIndex: 1,
     position: { x: 220, y: 80 }, size: { width: 520, height: 400 },
+  },
+  game: {
+    isOpen: false, isMaximized: false, zIndex: 1,
+    position: { x: 100, y: 50 }, size: { width: 420, height: 600 },
+  },
+  resume: {
+    isOpen: false, isMaximized: false, zIndex: 1,
+    position: { x: 100, y: 50 }, size: { width: 650, height: 550 },
+  },
+  terminal: {
+    isOpen: false, isMaximized: false, zIndex: 1,
+    position: { x: 140, y: 60 }, size: { width: 620, height: 450 },
   },
 };
 
@@ -99,6 +115,20 @@ export const useWindowStore = create<WindowStore>((set) => ({
       windows: {
         ...state.windows,
         [id]: { ...state.windows[id], position: { x, y } },
+      },
+    })),
+
+  updateSize: (id, width, height) =>
+    set((state) => ({
+      windows: {
+        ...state.windows,
+        [id]: {
+          ...state.windows[id],
+          size: {
+            width: Math.max(320, width),
+            height: Math.max(200, height),
+          },
+        },
       },
     })),
 
