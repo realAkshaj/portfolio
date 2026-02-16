@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Download, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { personalInfo, skills, experiences, education, projects } from "@/data/portfolio";
 
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.04 } } };
@@ -94,12 +94,13 @@ export function ResumeContent() {
       {/* Download button */}
       <motion.div variants={item} className="flex justify-center gap-3 border-t border-white/[0.08] pt-4">
         <a
-          href="/resume.pdf"
-          download
+          href="https://drive.google.com/file/d/1Ff9iWJJRu9jcSKh-Zixmy6gNN8GaO5b1/view?usp=sharing"
+          target="_blank"
+          rel="noopener noreferrer"
           className="inline-flex items-center gap-2 rounded-lg border border-accent-blue/30 bg-accent-blue/10 px-5 py-2.5 text-xs font-medium text-accent-blue transition-all hover:bg-accent-blue/20"
         >
-          <Download size={14} />
-          Download PDF
+          <ExternalLink size={14} />
+          View Full Resume
         </a>
       </motion.div>
     </motion.div>

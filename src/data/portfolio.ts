@@ -110,32 +110,16 @@ export interface Experience {
 }
 
 export const experiences: Experience[] = [
-  {
-    role: "Graduate Research & Teaching",
-    company: "University of Illinois Chicago",
-    date: "2023 — Present",
-    description:
-      "Pursuing M.S. in Computer Science. Research on ML on Graphs, toxicity detection in AI systems, and computational complexity. Contributing to coursework and collaborative research projects.",
-    color: "#89b4fa",
-  },
+  
   {
     role: "Co-Founder & Software Developer",
     company: "ESWAF Building Solutions",
     location: "Chennai, India",
-    date: "2020 — 2023",
+    date: "Jun. 2022 — Dec. 2023",
     description:
       "Co-founded a construction technology startup. Built distributed systems handling high-volume transactions, designed scalable backend architectures, and managed high-throughput data processing pipelines.",
     color: "#cba6f7",
-  },
-  {
-    role: "B.E. Computer Science & Engineering",
-    company: "S.A. Engineering College, Anna University",
-    location: "India",
-    date: "2016 — 2020",
-    description:
-      "Completed Bachelor's in CSE. Built foundational expertise in programming, algorithms, data structures, and software engineering across multiple languages and frameworks.",
-    color: "#a6e3a1",
-  },
+  }
 ];
 
 export interface Education {

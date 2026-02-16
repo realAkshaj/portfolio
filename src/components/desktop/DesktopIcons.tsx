@@ -26,10 +26,13 @@ export function DesktopIcons() {
     if (initialized.current) return;
     initialized.current = true;
     const initial: Record<string, IconPosition> = {};
+    const maxPerColumn = Math.max(1, Math.floor((window.innerHeight - 120) / 115));
     desktopIcons.forEach((icon, i) => {
+      const col = Math.floor(i / maxPerColumn);
+      const row = i % maxPerColumn;
       initial[icon.id] = {
-        x: window.innerWidth - 120,
-        y: 45 + i * 115,
+        x: window.innerWidth - 120 - col * 110,
+        y: 45 + row * 115,
       };
     });
     positionsRef.current = initial;

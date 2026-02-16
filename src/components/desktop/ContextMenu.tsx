@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useWindowStore } from "@/store/window-store";
 import { Terminal, Info, Palette, RefreshCw } from "lucide-react";
@@ -32,17 +32,23 @@ export function ContextMenu({ onWallpaperChange }: ContextMenuProps) {
     setShowWallpapers(false);
   }, []);
 
+  const menuRef = useRef<HTMLDivElement>(null);
+
   const close = useCallback(() => {
     setMenu(null);
     setShowWallpapers(false);
   }, []);
 
   useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && menuRef.current.contains(e.target as Node)) return;
+      close();
+    };
     document.addEventListener("contextmenu", handleContextMenu);
-    document.addEventListener("click", close);
+    document.addEventListener("click", handleClick);
     return () => {
       document.removeEventListener("contextmenu", handleContextMenu);
-      document.removeEventListener("click", close);
+      document.removeEventListener("click", handleClick);
     };
   }, [handleContextMenu, close]);
 
@@ -50,6 +56,7 @@ export function ContextMenu({ onWallpaperChange }: ContextMenuProps) {
     <AnimatePresence>
       {menu && (
         <motion.div
+          ref={menuRef}
           className="fixed z-[30000] min-w-[200px] overflow-hidden rounded-xl border border-white/[0.1] py-1.5 glass-heavy window-shadow"
           style={{ left: menu.x, top: menu.y }}
           initial={{ opacity: 0, scale: 0.9 }}
