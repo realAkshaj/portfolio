@@ -25,7 +25,7 @@
 }
 
 .wallpaper {
-  background: linear-gradient(135deg, #16213e 0%, #0f3460 40%, #533483 100%);
+  /* background set via inline style for dynamic wallpaper switching */
 }
 
 .wallpaper::before {
