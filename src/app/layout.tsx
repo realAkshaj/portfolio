@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono, IBM_Plex_Mono } from "next/font/google";
+import { Share_Tech_Mono, Orbitron } from "next/font/google";
 import "./globals.css";
 
-const jetbrains = JetBrains_Mono({
+const shareTech = Share_Tech_Mono({
   subsets: ["latin"],
-  variable: "--font-jetbrains",
+  variable: "--font-share-tech",
   display: "swap",
-  weight: ["400", "500", "600"],
+  weight: "400",
 });
 
-const ibmPlex = IBM_Plex_Mono({
+const orbitron = Orbitron({
   subsets: ["latin"],
-  variable: "--font-ibm-plex",
+  variable: "--font-orbitron",
   display: "swap",
-  weight: ["400", "500"],
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${jetbrains.variable} ${ibmPlex.variable}`}>
+    <html lang="en" className={`${shareTech.variable} ${orbitron.variable}`}>
       <body className="font-body bg-crust text-text antialiased">
         {children}
       </body>

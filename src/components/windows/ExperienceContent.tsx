@@ -15,7 +15,7 @@ export function ExperienceContent() {
         <motion.div key={exp.company} variants={item} className="relative mb-7">
           <div className="absolute -left-[20px] top-1.5 z-[1] h-2.5 w-2.5 rounded-full border-2 border-crust"
             style={{ backgroundColor: exp.color }} />
-          <h3 className="text-[15px] font-semibold text-white">{exp.role}</h3>
+          <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-white">{exp.role}</h3>
           <p className="text-[13px] text-accent-blue">
             {exp.company}
             {exp.location && <span className="text-text-dim"> · {exp.location}</span>}

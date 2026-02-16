@@ -35,8 +35,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        mono: ["var(--font-jetbrains)", "monospace"],
-        body: ["var(--font-ibm-plex)", "monospace"],
+        mono: ["var(--font-share-tech)", "monospace"],
+        body: ["var(--font-share-tech)", "monospace"],
+        display: ["var(--font-orbitron)", "sans-serif"],
       },
       animation: {
         "window-open": "windowOpen 0.25s cubic-bezier(0.16, 1, 0.3, 1)",

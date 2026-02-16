@@ -21,7 +21,7 @@ export function ProjectsContent() {
         <motion.div key={project.name} variants={item}
           className="mb-4 cursor-default rounded-xl border border-white/[0.08] bg-white/[0.03] p-5 transition-all hover:border-accent-blue/30 hover:bg-white/[0.05]">
           <div className="mb-2.5 flex items-start justify-between">
-            <h3 className="text-base font-semibold text-white">{project.name}</h3>
+            <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-white">{project.name}</h3>
             <span className={`rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider ${tagColorMap[project.tagColor]}`}>
               {project.tag}
             </span>

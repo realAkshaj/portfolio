@@ -15,7 +15,7 @@ export function AboutContent() {
           {personalInfo.initials}
         </div>
         <div className="text-center md:text-left">
-          <h1 className="mb-1 font-mono text-2xl font-bold text-white">{personalInfo.name}</h1>
+          <h1 className="mb-1 font-display text-2xl font-bold uppercase tracking-wider text-white">{personalInfo.name}</h1>
           <p className="mb-2 text-sm text-accent-blue">{personalInfo.title}</p>
           <p className="text-xs text-text-dim">{personalInfo.location}</p>
         </div>

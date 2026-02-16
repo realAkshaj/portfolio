@@ -21,7 +21,7 @@ export function BootScreen() {
           transition={{ duration: 0.5 }}
         >
           <motion.div
-            className="mb-6 font-mono text-5xl font-bold text-accent-blue"
+            className="mb-6 font-display text-5xl font-bold text-accent-blue"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
