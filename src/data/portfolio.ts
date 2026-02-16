@@ -13,10 +13,11 @@ export const personalInfo = {
     { value: "∞", label: "Curiosity" },
   ],
   links: {
-    github: "https://github.com/akshaj",
-    linkedin: "https://linkedin.com/in/akshaj",
-    email: "akshaj@example.com",
-    website: "https://akshaj.dev",
+    github: "https://github.com/realAkshaj",
+    linkedin: "https://www.linkedin.com/in/akshajks/",
+    email: "akshaj32@gmail.com",
+    emailAlt: "akurr@uic.edu",
+    website: "https://akshajks.com",
   },
 };
 

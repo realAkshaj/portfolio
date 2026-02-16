@@ -9,8 +9,9 @@ const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
 
 const contactCards = [
   { icon: Mail, label: "Email", value: personalInfo.links.email, href: `mailto:${personalInfo.links.email}` },
+  { icon: Mail, label: "University Email", value: personalInfo.links.emailAlt, href: `mailto:${personalInfo.links.emailAlt}` },
   { icon: Github, label: "GitHub", value: personalInfo.links.github.replace("https://", ""), href: personalInfo.links.github },
-  { icon: Linkedin, label: "LinkedIn", value: personalInfo.links.linkedin.replace("https://", ""), href: personalInfo.links.linkedin },
+  { icon: Linkedin, label: "LinkedIn", value: personalInfo.links.linkedin.replace("https://www.", ""), href: personalInfo.links.linkedin },
   { icon: Globe, label: "Website", value: personalInfo.links.website.replace("https://", ""), href: personalInfo.links.website },
 ];
 
