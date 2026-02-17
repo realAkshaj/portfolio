@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 /* ── Typewriter terminal widget ─────────────────────────────── */
 
@@ -52,7 +53,7 @@ function TerminalWidget() {
 
   return (
     <div
-      className="glass-heavy rounded-xl border border-white/[0.06] px-5 py-4 font-mono text-[13px] leading-relaxed select-none pointer-events-none max-w-[520px] w-[90vw] sm:w-auto"
+      className="glass-heavy rounded-xl border border-white/[0.06] px-5 py-4 font-mono text-[13px] leading-relaxed select-none max-w-[520px] w-[90vw] sm:w-auto"
     >
       {displayed.map((line, i) => (
         <div key={i} className="whitespace-pre-wrap break-words">
@@ -84,7 +85,7 @@ const STATUS_ROWS: [string, string][] = [
 
 function StatusWidget() {
   return (
-    <div className="glass-heavy rounded-xl border border-white/[0.06] px-5 py-4 font-mono text-[13px] leading-relaxed select-none pointer-events-none max-w-[340px] w-[90vw] sm:w-auto">
+    <div className="glass-heavy rounded-xl border border-white/[0.06] px-5 py-4 font-mono text-[13px] leading-relaxed select-none max-w-[340px] w-[90vw] sm:w-auto">
       <div className="text-accent-blue mb-2 text-xs tracking-wider opacity-70">
         {">"} status
       </div>
@@ -110,6 +111,54 @@ function StatusWidget() {
   );
 }
 
+/* ── Minimizable wrapper ──────────────────────────────────────── */
+
+function MinimizableWidget({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  const [minimized, setMinimized] = useState(false);
+
+  return (
+    <AnimatePresence mode="wait">
+      {minimized ? (
+        <motion.button
+          key="pill"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          transition={{ duration: 0.2 }}
+          onClick={() => setMinimized(false)}
+          className="pointer-events-auto glass-heavy rounded-lg border border-white/[0.06] px-3 py-1.5 font-mono text-[11px] text-text-dim hover:text-white hover:border-white/[0.15] transition-colors cursor-pointer"
+        >
+          {label} <span className="text-accent-blue ml-1">+</span>
+        </motion.button>
+      ) : (
+        <motion.div
+          key="widget"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.2 }}
+          className="relative"
+        >
+          <button
+            onClick={() => setMinimized(true)}
+            className="pointer-events-auto absolute -top-1.5 -right-1.5 z-10 flex h-5 w-5 items-center justify-center rounded-full border border-white/[0.1] bg-surface-0/80 text-[10px] text-text-dim hover:text-white hover:border-white/[0.25] transition-colors cursor-pointer"
+            aria-label={`Minimize ${label}`}
+          >
+            &minus;
+          </button>
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 /* ── Combined layout ────────────────────────────────────────── */
 
 export function DesktopWidgets() {
@@ -126,8 +175,12 @@ export function DesktopWidgets() {
   return (
     <div className="absolute inset-0 z-[50] pointer-events-none flex items-center justify-start pl-6 sm:pl-12 lg:pl-20">
       <div className="flex flex-col gap-4 max-h-[calc(100vh-140px)]">
-        <TerminalWidget />
-        <StatusWidget />
+        <MinimizableWidget label="terminal">
+          <TerminalWidget />
+        </MinimizableWidget>
+        <MinimizableWidget label="status">
+          <StatusWidget />
+        </MinimizableWidget>
       </div>
     </div>
   );

@@ -73,7 +73,7 @@ const defaultWindows: Record<WindowId, WindowState> = {
 
 export const useWindowStore = create<WindowStore>((set) => ({
   windows: defaultWindows,
-  topZIndex: 1,
+  topZIndex: 100,
   booted: false,
 
   openWindow: (id) =>
