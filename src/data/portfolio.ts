@@ -41,6 +41,15 @@ export const projects: Project[] = [
     link: "https://ai-cms-platform-web.vercel.app",
   },
   {
+    name: "LLM Conversational Agent",
+    description:
+      "A multi-turn conversational agent combining AWS Bedrock and Ollama in a microservices architecture. Built with Akka HTTP and Scala, it chains AWS Lambda (Titan Text Lite) for initial responses with local Ollama (LLaMA 3.2) for follow-ups, supporting up to 5 autonomous conversation turns with full logging. Containerized with Docker Compose and deployable on AWS EC2 via ECR.",
+    tag: "AI/ML",
+    tagColor: "ai",
+    tech: ["Scala", "AWS Lambda", "Ollama", "Akka HTTP", "Docker"],
+    link: "https://github.com/realAkshaj/LLM-Microservice",
+  },
+  {
     name: "Distributed Telemetry Pipeline",
     description:
       "High-throughput distributed pipeline for real-time telemetry data ingestion, processing, and visualization. Built to handle millions of events per second with fault tolerance and horizontal scaling.",
