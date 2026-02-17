@@ -27,10 +27,18 @@ export function ProjectsContent() {
             </span>
           </div>
           <p className="mb-3 text-[13px] leading-relaxed text-text-dim">{project.description}</p>
-          <div className="flex flex-wrap gap-1.5">
-            {project.tech.map((tech) => (
-              <span key={tech} className="rounded bg-white/[0.06] px-2 py-0.5 text-[11px] text-text-dim">{tech}</span>
-            ))}
+          <div className="flex items-center justify-between">
+            <div className="flex flex-wrap gap-1.5">
+              {project.tech.map((tech) => (
+                <span key={tech} className="rounded bg-white/[0.06] px-2 py-0.5 text-[11px] text-text-dim">{tech}</span>
+              ))}
+            </div>
+            {project.link && (
+              <a href={project.link} target="_blank" rel="noopener noreferrer"
+                className="ml-3 shrink-0 rounded-lg border border-white/[0.08] bg-white/[0.05] px-3 py-1 text-[11px] font-medium text-accent-blue transition-all hover:border-accent-blue/40 hover:bg-accent-blue/10">
+                Live Demo &rarr;
+              </a>
+            )}
           </div>
         </motion.div>
       ))}

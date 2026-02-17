@@ -66,10 +66,11 @@ export const projects: Project[] = [
   {
     name: "AI Content Management System",
     description:
-      "Intelligent CMS with AI-powered content generation, categorization, and optimization. Built with modern web technologies and integrated ML models for smart content workflows.",
+      "A sophisticated, full-stack AI-powered CMS for modern multi-tenant content workflows. Features dark glassmorphism UI, Google Gemini integration for automated article generation, SEO optimization, and quality scoring. Includes JWT auth, role-based access control, a WYSIWYG editor, and a built-in public blog.",
     tag: "Full-Stack",
     tagColor: "web",
-    tech: ["JavaScript", "React", "Node.js", "MongoDB", "OpenAI"],
+    tech: ["Next.js", "Express", "PostgreSQL", "Gemini AI", "JWT"],
+    link: "https://ai-cms-platform-web.vercel.app",
   },
 ];
 
