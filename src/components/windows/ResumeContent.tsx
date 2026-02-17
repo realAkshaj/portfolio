@@ -59,7 +59,15 @@ export function ResumeContent() {
               {exp.company}
               {exp.location && <span className="text-text-dim"> — {exp.location}</span>}
             </p>
-            <p className="mt-1 leading-relaxed text-text-dim">{exp.description}</p>
+            <p className="mt-1 leading-relaxed text-text-dim">{exp.summary}</p>
+            <ul className="mt-1 space-y-0.5">
+              {exp.bullets.map((bullet, i) => (
+                <li key={i} className="flex gap-1.5 text-text-dim">
+                  <span className="shrink-0">•</span>
+                  <span>{bullet}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         ))}
       </motion.div>

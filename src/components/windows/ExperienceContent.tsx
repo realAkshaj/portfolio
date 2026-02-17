@@ -20,8 +20,16 @@ export function ExperienceContent() {
             {exp.company}
             {exp.location && <span className="text-text-dim"> · {exp.location}</span>}
           </p>
-          <p className="mb-2 text-[11px] text-text-dim">{exp.date}</p>
-          <p className="text-[13px] leading-[1.7] text-text-dim">{exp.description}</p>
+          <p className="mb-2.5 text-[11px] text-text-dim">{exp.date}</p>
+          <p className="mb-2.5 text-[13px] leading-[1.7] text-text-dim">{exp.summary}</p>
+          <ul className="space-y-1.5">
+            {exp.bullets.map((bullet, i) => (
+              <li key={i} className="flex gap-2 text-[12.5px] leading-[1.65] text-text-dim">
+                <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-white/20" />
+                <span>{bullet}</span>
+              </li>
+            ))}
+          </ul>
         </motion.div>
       ))}
     </motion.div>

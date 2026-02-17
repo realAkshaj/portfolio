@@ -107,7 +107,8 @@ export interface Experience {
   company: string;
   location?: string;
   date: string;
-  description: string;
+  summary: string;
+  bullets: string[];
   color: string;
 }
 
@@ -118,8 +119,14 @@ export const experiences: Experience[] = [
     company: "ESWAF Building Solutions",
     location: "Chennai, India",
     date: "Jun. 2022 — Dec. 2023",
-    description:
-      "Co-founded a construction technology startup. Built distributed systems handling high-volume transactions, designed scalable backend architectures, and managed high-throughput data processing pipelines.",
+    summary: "Co-founded a construction technology startup and led full-stack development across the entire product lifecycle.",
+    bullets: [
+      "Built scalable microservices using Python and Java processing 50K+ daily transactions with 99.9% uptime across 15+ enterprise clients, reducing API latency 65% (800ms to 280ms) through distributed architecture and query optimization",
+      "Designed and shipped user-facing React frontends with TypeScript alongside RESTful API backends, achieving 95% test coverage through pytest and JUnit frameworks",
+      "Implemented Jenkins CI/CD pipelines with Docker containerization, cutting deployment time 60% and enabling rapid iteration across sprint cycles",
+      "Collaborated with cross-functional stakeholders through 50+ code reviews and technical design discussions, communicating architecture decisions to non-technical clients",
+      "Reduced mean time to resolution from 45min to 8min by building CloudWatch monitoring dashboards and establishing incident response protocols",
+    ],
     color: "#cba6f7",
   }
 ];

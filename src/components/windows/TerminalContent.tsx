@@ -114,7 +114,8 @@ export function TerminalContent() {
           return experiences.flatMap((e) => [
             `▸ ${e.role} @ ${e.company}`,
             `  ${e.date}${e.location ? ` — ${e.location}` : ""}`,
-            `  ${e.description}`,
+            `  ${e.summary}`,
+            ...e.bullets.map((b) => `    • ${b}`),
             "",
           ]);
         }
