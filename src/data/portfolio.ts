@@ -151,14 +151,14 @@ export const education: Education[] = [
   {
     degree: "M.S. Computer Science",
     school: "University of Illinois Chicago (UIC)",
-    date: "2023 — 2025 (Expected)",
+    date: "Aug 2024 — May 2026 (Expected)",
     details:
       "Coursework in Machine Learning on Graphs, Distributed Systems, and AI Safety. Research on toxicity detection, graph neural networks, and computational complexity.",
   },
   {
     degree: "B.E. Computer Science & Engineering",
     school: "S.A. Engineering College, Anna University",
-    date: "2016 — 2020",
+    date: "Aug 2020 — May 2024",
     details:
       "Comprehensive foundation in computer science including algorithms, data structures, software engineering, database systems, and computer networks.",
   },
