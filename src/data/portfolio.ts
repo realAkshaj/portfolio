@@ -32,6 +32,15 @@ export interface Project {
 
 export const projects: Project[] = [
   {
+    name: "AI Content Management System",
+    description:
+      "A sophisticated, full-stack AI-powered CMS for modern multi-tenant content workflows. Features dark glassmorphism UI, Google Gemini integration for automated article generation, SEO optimization, and quality scoring. Includes JWT auth, role-based access control, a WYSIWYG editor, and a built-in public blog.",
+    tag: "Full-Stack",
+    tagColor: "web",
+    tech: ["Next.js", "Express", "PostgreSQL", "Gemini AI", "JWT"],
+    link: "https://ai-cms-platform-web.vercel.app",
+  },
+  {
     name: "Distributed Telemetry Pipeline",
     description:
       "High-throughput distributed pipeline for real-time telemetry data ingestion, processing, and visualization. Built to handle millions of events per second with fault tolerance and horizontal scaling.",
@@ -62,15 +71,6 @@ export const projects: Project[] = [
     tag: "Social Impact",
     tagColor: "impact",
     tech: ["Python", "Twilio", "LLMs", "REST APIs"],
-  },
-  {
-    name: "AI Content Management System",
-    description:
-      "A sophisticated, full-stack AI-powered CMS for modern multi-tenant content workflows. Features dark glassmorphism UI, Google Gemini integration for automated article generation, SEO optimization, and quality scoring. Includes JWT auth, role-based access control, a WYSIWYG editor, and a built-in public blog.",
-    tag: "Full-Stack",
-    tagColor: "web",
-    tech: ["Next.js", "Express", "PostgreSQL", "Gemini AI", "JWT"],
-    link: "https://ai-cms-platform-web.vercel.app",
   },
 ];
 
