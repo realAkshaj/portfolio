@@ -2,18 +2,18 @@
 
 import { useEffect, useRef, useCallback } from "react";
 
-// Physics — tuned to feel like the original
-const GRAVITY = 0.4;
-const JUMP = -7;
-const MAX_FALL_SPEED = 10;
+// Physics
+const GRAVITY = 0.3;
+const JUMP = -6.2;
+const MAX_FALL_SPEED = 8;
 const PIPE_WIDTH = 52;
-const PIPE_GAP = 135;
-const PIPE_SPEED = 2.5;
+const PIPE_GAP = 165;
+const PIPE_SPEED = 2.0;
 const BIRD_W = 34;
 const BIRD_H = 24;
 const BIRD_X = 70;
 const GROUND_H = 56;
-const GROUND_SPEED = 2.5;
+const GROUND_SPEED = 2.0;
 
 interface Pipe {
   x: number;
@@ -139,6 +139,104 @@ export function FlappyGame() {
     resizeCanvas();
     const observer = new ResizeObserver(resizeCanvas);
     observer.observe(container);
+
+    // --- Pixel font (5x7 bitmap glyphs) ---
+    const FONT: Record<string, number[]> = {
+      "0": [0x7C,0xC6,0xCE,0xD6,0xE6,0xC6,0x7C],
+      "1": [0x30,0x70,0x30,0x30,0x30,0x30,0xFC],
+      "2": [0x78,0xCC,0x0C,0x38,0x60,0xCC,0xFC],
+      "3": [0x78,0xCC,0x0C,0x38,0x0C,0xCC,0x78],
+      "4": [0x1C,0x3C,0x6C,0xCC,0xFE,0x0C,0x0C],
+      "5": [0xFC,0xC0,0xF8,0x0C,0x0C,0xCC,0x78],
+      "6": [0x38,0x60,0xC0,0xF8,0xCC,0xCC,0x78],
+      "7": [0xFC,0xCC,0x0C,0x18,0x30,0x30,0x30],
+      "8": [0x78,0xCC,0xCC,0x78,0xCC,0xCC,0x78],
+      "9": [0x78,0xCC,0xCC,0x7C,0x0C,0x18,0x70],
+      A: [0x30,0x78,0xCC,0xCC,0xFC,0xCC,0xCC],
+      B: [0xF8,0xCC,0xCC,0xF8,0xCC,0xCC,0xF8],
+      C: [0x78,0xCC,0xC0,0xC0,0xC0,0xCC,0x78],
+      D: [0xF0,0xD8,0xCC,0xCC,0xCC,0xD8,0xF0],
+      E: [0xFC,0xC0,0xC0,0xF8,0xC0,0xC0,0xFC],
+      F: [0xFC,0xC0,0xC0,0xF8,0xC0,0xC0,0xC0],
+      G: [0x78,0xCC,0xC0,0xDC,0xCC,0xCC,0x7C],
+      H: [0xCC,0xCC,0xCC,0xFC,0xCC,0xCC,0xCC],
+      I: [0xFC,0x30,0x30,0x30,0x30,0x30,0xFC],
+      J: [0x1C,0x0C,0x0C,0x0C,0xCC,0xCC,0x78],
+      K: [0xCC,0xD8,0xF0,0xE0,0xF0,0xD8,0xCC],
+      L: [0xC0,0xC0,0xC0,0xC0,0xC0,0xC0,0xFC],
+      M: [0xCC,0xEC,0xFC,0xDC,0xCC,0xCC,0xCC],
+      N: [0xCC,0xEC,0xFC,0xDC,0xCC,0xCC,0xCC],
+      O: [0x78,0xCC,0xCC,0xCC,0xCC,0xCC,0x78],
+      P: [0xF8,0xCC,0xCC,0xF8,0xC0,0xC0,0xC0],
+      Q: [0x78,0xCC,0xCC,0xCC,0xDC,0x78,0x1C],
+      R: [0xF8,0xCC,0xCC,0xF8,0xD8,0xCC,0xCC],
+      S: [0x78,0xCC,0xC0,0x78,0x0C,0xCC,0x78],
+      T: [0xFC,0x30,0x30,0x30,0x30,0x30,0x30],
+      U: [0xCC,0xCC,0xCC,0xCC,0xCC,0xCC,0x78],
+      V: [0xCC,0xCC,0xCC,0xCC,0xCC,0x78,0x30],
+      W: [0xCC,0xCC,0xCC,0xDC,0xFC,0xEC,0xCC],
+      X: [0xCC,0xCC,0x78,0x30,0x78,0xCC,0xCC],
+      Y: [0xCC,0xCC,0xCC,0x78,0x30,0x30,0x30],
+      Z: [0xFC,0x0C,0x18,0x30,0x60,0xC0,0xFC],
+      " ": [0x00,0x00,0x00,0x00,0x00,0x00,0x00],
+      "/": [0x04,0x08,0x10,0x20,0x40,0x80,0x00],
+      "!": [0x30,0x30,0x30,0x30,0x30,0x00,0x30],
+    };
+
+    const drawPixelChar = (
+      ctx: CanvasRenderingContext2D,
+      char: string,
+      x: number,
+      y: number,
+      scale: number,
+      fill: string,
+      outline?: string,
+    ) => {
+      const glyph = FONT[char.toUpperCase()];
+      if (!glyph) return;
+      const px = scale;
+      for (let row = 0; row < 7; row++) {
+        const bits = glyph[row];
+        for (let col = 0; col < 8; col++) {
+          if (bits & (0x80 >> col)) {
+            const bx = x + col * px;
+            const by = y + row * px;
+            if (outline) {
+              ctx.fillStyle = outline;
+              ctx.fillRect(bx - px, by, px, px);
+              ctx.fillRect(bx + px, by, px, px);
+              ctx.fillRect(bx, by - px, px, px);
+              ctx.fillRect(bx, by + px, px, px);
+            }
+            ctx.fillStyle = fill;
+            ctx.fillRect(bx, by, px, px);
+          }
+        }
+      }
+    };
+
+    const measurePixelText = (text: string, scale: number, spacing: number) => {
+      return text.length * (8 * scale + spacing) - spacing;
+    };
+
+    const drawPixelText = (
+      ctx: CanvasRenderingContext2D,
+      text: string,
+      cx: number,
+      cy: number,
+      scale: number,
+      fill: string,
+      outline?: string,
+      spacing = 2,
+    ) => {
+      const totalW = measurePixelText(text, scale, spacing);
+      let x = cx - totalW / 2;
+      const y = cy - (7 * scale) / 2;
+      for (const ch of text) {
+        drawPixelChar(ctx, ch, x, y, scale, fill, outline);
+        x += 8 * scale + spacing;
+      }
+    };
 
     // --- Render helpers ---
 
@@ -444,21 +542,7 @@ export function FlappyGame() {
     };
 
     const drawScore = (ctx: CanvasRenderingContext2D, W: number, score: number) => {
-      const text = String(score);
-      ctx.font = "bold 52px 'Arial Black', Arial, sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "top";
-      // Double outline for depth
-      ctx.strokeStyle = "rgba(50, 30, 10, 0.7)";
-      ctx.lineWidth = 7;
-      ctx.strokeText(text, W / 2, 22);
-      ctx.strokeStyle = "rgba(80, 50, 20, 0.5)";
-      ctx.lineWidth = 4;
-      ctx.strokeText(text, W / 2, 22);
-      // White fill
-      ctx.fillStyle = "#ffffff";
-      ctx.fillText(text, W / 2, 22);
-      ctx.textBaseline = "alphabetic";
+      drawPixelText(ctx, String(score), W / 2, 35, 5, "#ffffff", "#543847", 4);
     };
 
     const drawParticles = (ctx: CanvasRenderingContext2D) => {
@@ -495,12 +579,24 @@ export function FlappyGame() {
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      // Star
-      ctx.fillStyle = isGold ? "#fff" : "rgba(255,255,255,0.8)";
-      ctx.font = "bold 18px Arial";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText("★", cx, cy + 1);
+      // Star — draw a 5-pointed star with pixels
+      const starColor = isGold ? "#fff" : "rgba(255,255,255,0.8)";
+      const sp = 2; // pixel size
+      const starPattern = [
+        [0,0,1,0,0],
+        [0,1,1,1,0],
+        [1,1,1,1,1],
+        [0,1,1,1,0],
+        [0,1,0,1,0],
+      ];
+      ctx.fillStyle = starColor;
+      for (let r = 0; r < starPattern.length; r++) {
+        for (let c = 0; c < starPattern[r].length; c++) {
+          if (starPattern[r][c]) {
+            ctx.fillRect(cx - 5 * sp / 2 + c * sp, cy - 5 * sp / 2 + r * sp, sp, sp);
+          }
+        }
+      }
     };
 
     // ---------- MAIN DRAW ----------
@@ -522,7 +618,7 @@ export function FlappyGame() {
         g.groundX = (g.groundX + GROUND_SPEED) % 18;
 
         // Spawn pipes
-        if (g.frameCount % 90 === 0) {
+        if (g.frameCount % 110 === 0) {
           const minTop = 70;
           const maxTop = groundY - PIPE_GAP - 70;
           const topH = minTop + Math.random() * (maxTop - minTop);
@@ -638,30 +734,19 @@ export function FlappyGame() {
 
       // Idle
       if (g.state === "idle") {
-        // Title with shadow
-        ctx.font = "bold 36px 'Arial Black', Arial, sans-serif";
-        ctx.textAlign = "center";
-        ctx.strokeStyle = "rgba(50, 30, 10, 0.6)";
-        ctx.lineWidth = 5;
-        ctx.strokeText("Flappy Bird", W / 2, H * 0.14);
-        ctx.fillStyle = "#fff";
-        ctx.fillText("Flappy Bird", W / 2, H * 0.14);
+        // Title
+        drawPixelText(ctx, "FLAPPY BIRD", W / 2, H * 0.13, 4, "#f8c53a", "#543847", 3);
 
         // Tap prompt
         const pulse = 0.6 + Math.sin(Date.now() / 300) * 0.4;
         ctx.globalAlpha = pulse;
-        ctx.font = "bold 18px Arial, sans-serif";
-        ctx.strokeStyle = "rgba(50, 30, 10, 0.5)";
-        ctx.lineWidth = 3;
-        ctx.strokeText("TAP TO START", W / 2, groundY - 30);
-        ctx.fillStyle = "#fff";
-        ctx.fillText("TAP TO START", W / 2, groundY - 30);
+        drawPixelText(ctx, "TAP TO START", W / 2, groundY - 35, 2, "#ffffff", "#543847", 2);
         ctx.globalAlpha = 1;
 
         // Controls hint
-        ctx.font = "13px Arial, sans-serif";
-        ctx.fillStyle = "rgba(255,255,255,0.5)";
-        ctx.fillText("Space / Click / Tap", W / 2, groundY - 10);
+        ctx.globalAlpha = 0.5;
+        drawPixelText(ctx, "SPACE / CLICK / TAP", W / 2, groundY - 12, 1, "#ffffff", undefined, 1);
+        ctx.globalAlpha = 1;
       }
 
       // Game Over
@@ -676,66 +761,35 @@ export function FlappyGame() {
         ctx.globalAlpha = fadeIn;
 
         // "Game Over"
-        ctx.font = "bold 32px 'Arial Black', Arial, sans-serif";
-        ctx.textAlign = "center";
-        ctx.strokeStyle = "rgba(50, 30, 10, 0.7)";
-        ctx.lineWidth = 5;
-        ctx.strokeText("Game Over", W / 2, py - 8);
-        ctx.fillStyle = "#f44";
-        ctx.fillText("Game Over", W / 2, py - 8);
+        drawPixelText(ctx, "GAME OVER", W / 2, py - 4, 3, "#fc3e3e", "#543847", 3);
 
         // Panel — rounded with border
-        // Outer
         ctx.fillStyle = "#deb960";
-        roundRect(ctx, px - 3, py + 12, panelW + 6, panelH + 6, 8);
+        roundRect(ctx, px - 3, py + 20, panelW + 6, panelH + 6, 8);
         ctx.fill();
         ctx.strokeStyle = "rgba(80, 50, 20, 0.5)";
         ctx.lineWidth = 2;
         ctx.stroke();
-        // Inner
         ctx.fillStyle = "#c8a84e";
-        roundRect(ctx, px + 5, py + 20, panelW - 10, panelH - 10, 5);
+        roundRect(ctx, px + 5, py + 28, panelW - 10, panelH - 10, 5);
         ctx.fill();
 
-        // Score labels
-        ctx.textAlign = "left";
-        ctx.font = "bold 15px Arial, sans-serif";
-        ctx.fillStyle = "#fff";
-        ctx.fillText("SCORE", px + 70, py + 52);
-        ctx.textAlign = "right";
-        ctx.font = "bold 30px 'Arial Black', Arial, sans-serif";
-        ctx.fillStyle = "#fff";
-        ctx.strokeStyle = "rgba(0,0,0,0.2)";
-        ctx.lineWidth = 2;
-        ctx.strokeText(String(g.score), px + panelW - 18, py + 57);
-        ctx.fillText(String(g.score), px + panelW - 18, py + 57);
+        // Score label + value
+        drawPixelText(ctx, "SCORE", px + 100, py + 50, 2, "#ffffff", undefined, 1);
+        drawPixelText(ctx, String(g.score), px + panelW - 30, py + 50, 3, "#ffffff", "#543847", 2);
 
-        ctx.textAlign = "left";
-        ctx.font = "bold 15px Arial, sans-serif";
-        ctx.fillStyle = "#fff";
-        ctx.fillText("BEST", px + 70, py + 100);
-        ctx.textAlign = "right";
-        ctx.font = "bold 30px 'Arial Black', Arial, sans-serif";
-        ctx.fillStyle = "#fff";
-        ctx.strokeStyle = "rgba(0,0,0,0.2)";
-        ctx.lineWidth = 2;
-        ctx.strokeText(String(g.highScore), px + panelW - 18, py + 105);
-        ctx.fillText(String(g.highScore), px + panelW - 18, py + 105);
+        // Best label + value
+        drawPixelText(ctx, "BEST", px + 104, py + 100, 2, "#ffffff", undefined, 1);
+        drawPixelText(ctx, String(g.highScore), px + panelW - 30, py + 100, 3, "#ffffff", "#543847", 2);
 
         // Medal
-        drawMedal(ctx, px + 38, py + 78, g.score);
+        drawMedal(ctx, px + 38, py + 80, g.score);
 
         // Retry
         if (g.deadTimer > 25) {
           const pulse = 0.5 + Math.sin(Date.now() / 300) * 0.5;
           ctx.globalAlpha = fadeIn * pulse;
-          ctx.font = "bold 18px Arial, sans-serif";
-          ctx.textAlign = "center";
-          ctx.strokeStyle = "rgba(50, 30, 10, 0.5)";
-          ctx.lineWidth = 3;
-          ctx.strokeText("TAP TO RETRY", W / 2, py + panelH + 40);
-          ctx.fillStyle = "#fff";
-          ctx.fillText("TAP TO RETRY", W / 2, py + panelH + 40);
+          drawPixelText(ctx, "TAP TO RETRY", W / 2, py + panelH + 45, 2, "#ffffff", "#543847", 2);
         }
 
         ctx.globalAlpha = 1;
