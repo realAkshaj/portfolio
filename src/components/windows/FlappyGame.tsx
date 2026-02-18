@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useCallback } from "react";
 
-// Physics — floaty, forgiving
-const GRAVITY = 0.2;
-const JUMP = -5.0;
-const MAX_FALL_SPEED = 5.5;
+// Physics — very floaty, casual
+const GRAVITY = 0.12;
+const JUMP = -3.8;
+const MAX_FALL_SPEED = 3.5;
 const PIPE_WIDTH = 52;
 const PIPE_GAP = 165;
 const PIPE_SPEED = 2.0;
