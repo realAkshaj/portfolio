@@ -174,173 +174,159 @@ export function FlappyGame() {
       ctx.fillText(text, x, y);
     };
 
+    // --- Pixel grid size ---
+    const P = 4; // base pixel block size
+
+    // Snap a value to the pixel grid
+    const snap = (v: number) => Math.round(v / P) * P;
+
     // --- Render helpers ---
 
     const drawSky = (ctx: CanvasRenderingContext2D, W: number, H: number) => {
-      const grad = ctx.createLinearGradient(0, 0, 0, H - GROUND_H);
-      grad.addColorStop(0, "#87CEEB");
-      grad.addColorStop(0.6, "#B0E0E6");
-      grad.addColorStop(1, "#E0F0E8");
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, W, H - GROUND_H);
+      const groundY = H - GROUND_H;
+      // Banded sky in pixel rows
+      const bands = ["#70c5ce", "#7ecad3", "#8dd0d8", "#9bd6dd", "#aadce2", "#c0e8ec", "#d5f0f0"];
+      const bandH = Math.ceil(groundY / bands.length);
+      for (let i = 0; i < bands.length; i++) {
+        ctx.fillStyle = bands[i];
+        ctx.fillRect(0, i * bandH, W, bandH + 1);
+      }
     };
 
     const drawClouds = (ctx: CanvasRenderingContext2D, W: number, _H: number, offset: number) => {
-      const clouds = [
-        { baseX: 0, y: 35, puffs: [[0,0,40,18],[30,-5,35,16],[55,2,30,14]] },
-        { baseX: 220, y: 65, puffs: [[0,0,35,15],[25,-3,30,13]] },
-        { baseX: 420, y: 25, puffs: [[0,0,45,20],[35,-6,38,17],[65,0,32,15]] },
-        { baseX: 600, y: 50, puffs: [[0,0,30,13],[22,-4,28,12]] },
+      // Blocky pixel clouds — each defined as rows of [startCol, width]
+      const cloudShapes = [
+        { rows: [[2,4],[1,6],[0,8],[0,8],[1,6]], baseX: 30, y: 30 },
+        { rows: [[1,3],[0,5],[0,5],[1,3]], baseX: 250, y: 55 },
+        { rows: [[3,3],[1,7],[0,10],[0,10],[1,8],[2,6]], baseX: 450, y: 22 },
+        { rows: [[1,4],[0,6],[0,6],[1,4]], baseX: 620, y: 48 },
       ];
-      ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-      for (const cloud of clouds) {
-        const bx = ((cloud.baseX - offset * 0.15) % (W + 200) + W + 200) % (W + 200) - 100;
-        for (const [px, py, rw, rh] of cloud.puffs) {
-          ctx.beginPath();
-          ctx.ellipse(bx + px, cloud.y + py, rw, rh, 0, 0, Math.PI * 2);
-          ctx.fill();
+      for (const cloud of cloudShapes) {
+        const bx = snap(((cloud.baseX - offset * 0.12) % (W + 200) + W + 200) % (W + 200) - 80);
+        for (let r = 0; r < cloud.rows.length; r++) {
+          const [sc, w] = cloud.rows[r];
+          // White block
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(bx + sc * P, cloud.y + r * P, w * P, P);
+          // Slight highlight on top row
+          if (r === 0) {
+            ctx.fillStyle = "rgba(255,255,255,0.5)";
+            ctx.fillRect(bx + sc * P, cloud.y + r * P, w * P, P);
+          }
         }
+        // Bottom shadow
+        const lastRow = cloud.rows[cloud.rows.length - 1];
+        ctx.fillStyle = "rgba(0,0,0,0.04)";
+        ctx.fillRect(bx + lastRow[0] * P, cloud.y + cloud.rows.length * P, lastRow[1] * P, P);
       }
     };
 
-    // Far background — soft hills
+    // Far background — stepped blocky hills
     const drawHills = (ctx: CanvasRenderingContext2D, W: number, H: number, offset: number) => {
       const groundY = H - GROUND_H;
-      ctx.fillStyle = "rgba(100, 180, 100, 0.25)";
-      ctx.beginPath();
-      ctx.moveTo(0, groundY);
-      for (let x = 0; x <= W; x += 2) {
-        const y = groundY - 30 - Math.sin((x + offset * 0.3) * 0.008) * 20 - Math.sin((x + offset * 0.3) * 0.015) * 10;
-        ctx.lineTo(x, y);
+      // Back hills
+      ctx.fillStyle = "rgba(90, 170, 90, 0.25)";
+      for (let x = 0; x < W; x += P) {
+        const h = 25 + Math.sin((x + offset * 0.25) * 0.01) * 18 + Math.sin((x + offset * 0.25) * 0.02) * 8;
+        const sh = snap(h);
+        ctx.fillRect(x, groundY - sh, P, sh);
       }
-      ctx.lineTo(W, groundY);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.fillStyle = "rgba(80, 160, 80, 0.3)";
-      ctx.beginPath();
-      ctx.moveTo(0, groundY);
-      for (let x = 0; x <= W; x += 2) {
-        const y = groundY - 15 - Math.sin((x + offset * 0.6 + 100) * 0.012) * 15 - Math.sin((x + offset * 0.6) * 0.02) * 8;
-        ctx.lineTo(x, y);
+      // Front hills
+      ctx.fillStyle = "rgba(70, 150, 70, 0.3)";
+      for (let x = 0; x < W; x += P) {
+        const h = 14 + Math.sin((x + offset * 0.5 + 80) * 0.015) * 12 + Math.sin((x + offset * 0.5) * 0.025) * 6;
+        const sh = snap(h);
+        ctx.fillRect(x, groundY - sh, P, sh);
       }
-      ctx.lineTo(W, groundY);
-      ctx.closePath();
-      ctx.fill();
     };
 
     const drawGround = (ctx: CanvasRenderingContext2D, W: number, H: number, groundX: number) => {
       const groundY = H - GROUND_H;
 
-      // Main dirt
-      const dirtGrad = ctx.createLinearGradient(0, groundY, 0, H);
-      dirtGrad.addColorStop(0, "#d2b04c");
-      dirtGrad.addColorStop(0.3, "#c9a545");
-      dirtGrad.addColorStop(1, "#b8943d");
-      ctx.fillStyle = dirtGrad;
+      // Dirt fill
+      ctx.fillStyle = "#ded895";
       ctx.fillRect(0, groundY, W, GROUND_H);
 
-      // Green grass top
-      const grassGrad = ctx.createLinearGradient(0, groundY, 0, groundY + 16);
-      grassGrad.addColorStop(0, "#5ec941");
-      grassGrad.addColorStop(1, "#4ab536");
-      ctx.fillStyle = grassGrad;
-      ctx.fillRect(0, groundY, W, 16);
+      // Darker dirt band
+      ctx.fillStyle = "#d2c878";
+      ctx.fillRect(0, groundY + P * 4, W, GROUND_H - P * 4);
 
-      // Grass highlight
-      ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
-      ctx.fillRect(0, groundY, W, 4);
+      // Green grass — 3 pixel rows
+      ctx.fillStyle = "#5ec941";
+      ctx.fillRect(0, groundY, W, P * 3);
+      // Highlight top
+      ctx.fillStyle = "#73d456";
+      ctx.fillRect(0, groundY, W, P);
+      // Dark edge
+      ctx.fillStyle = "#4aaa34";
+      ctx.fillRect(0, groundY + P * 3, W, P);
 
-      // Grass edge shadow
-      ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
-      ctx.fillRect(0, groundY + 16, W, 2);
-
-      // Dirt texture — diagonal hash marks
-      ctx.strokeStyle = "rgba(160, 130, 60, 0.25)";
-      ctx.lineWidth = 1.5;
-      const spacing = 18;
-      const gx = groundX % spacing;
-      for (let x = -spacing + gx; x < W + spacing; x += spacing) {
-        ctx.beginPath();
-        ctx.moveTo(x, groundY + 24);
-        ctx.lineTo(x + 8, groundY + 40);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(x + 9, groundY + 26);
-        ctx.lineTo(x + 14, groundY + 36);
-        ctx.stroke();
+      // Pixelated dirt pattern — checkerboard
+      const gx = snap(groundX);
+      ctx.fillStyle = "rgba(160, 140, 70, 0.2)";
+      for (let x = -P * 2 + (gx % (P * 2)); x < W + P * 2; x += P * 2) {
+        for (let row = 0; row < 3; row++) {
+          const offsetRow = row % 2 === 0 ? 0 : P;
+          ctx.fillRect(x + offsetRow, groundY + P * 5 + row * P * 2, P, P);
+        }
       }
     };
 
+    const drawPipeSection = (
+      ctx: CanvasRenderingContext2D,
+      x: number, y: number, w: number, h: number,
+      isCap: boolean,
+    ) => {
+      const sx = snap(x);
+      const sy = snap(y);
+      const sw = snap(w);
+      const sh = snap(h);
+
+      // Main body
+      ctx.fillStyle = "#73bf2e";
+      ctx.fillRect(sx, sy, sw, sh);
+
+      // Left highlight column
+      ctx.fillStyle = "#8ed64a";
+      ctx.fillRect(sx, sy, P, sh);
+      ctx.fillStyle = "#82cc40";
+      ctx.fillRect(sx + P, sy, P, sh);
+
+      // Right shadow column
+      ctx.fillStyle = "#5a9e1c";
+      ctx.fillRect(sx + sw - P, sy, P, sh);
+      ctx.fillStyle = "#63a922";
+      ctx.fillRect(sx + sw - P * 2, sy, P, sh);
+
+      // Top/bottom pixel edge for caps
+      if (isCap) {
+        ctx.fillStyle = "#8ed64a";
+        ctx.fillRect(sx, sy, sw, P);
+        ctx.fillStyle = "#5a9e1c";
+        ctx.fillRect(sx, sy + sh - P, sw, P);
+      }
+
+      // Outline
+      ctx.strokeStyle = "#3d7a12";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(sx, sy, sw, sh);
+    };
+
     const drawPipe = (ctx: CanvasRenderingContext2D, pipe: Pipe, H: number) => {
-      const capH = 26;
-      const capOv = 4; // overhang
+      const capH = snap(26);
+      const capOv = P;
       const groundY = H - GROUND_H;
-      const r = 4; // corner radius for caps
 
-      // --- Top pipe ---
-      // Body
-      const bodyGrad = ctx.createLinearGradient(pipe.x, 0, pipe.x + PIPE_WIDTH, 0);
-      bodyGrad.addColorStop(0, "#5aad1e");
-      bodyGrad.addColorStop(0.15, "#78cc3c");
-      bodyGrad.addColorStop(0.4, "#6dbe32");
-      bodyGrad.addColorStop(0.85, "#59a81d");
-      bodyGrad.addColorStop(1, "#4a8f16");
-      ctx.fillStyle = bodyGrad;
-      ctx.fillRect(pipe.x, 0, PIPE_WIDTH, pipe.topH - capH);
+      // Top pipe body
+      drawPipeSection(ctx, pipe.x, 0, PIPE_WIDTH, pipe.topH - capH, false);
+      // Top pipe cap
+      drawPipeSection(ctx, pipe.x - capOv, pipe.topH - capH, PIPE_WIDTH + capOv * 2, capH, true);
 
-      // Body highlight
-      ctx.fillStyle = "rgba(255,255,255,0.12)";
-      ctx.fillRect(pipe.x + 4, 0, 6, pipe.topH - capH);
-
-      // Body shadow
-      ctx.fillStyle = "rgba(0,0,0,0.1)";
-      ctx.fillRect(pipe.x + PIPE_WIDTH - 6, 0, 6, pipe.topH - capH);
-
-      // Cap
-      const capGrad = ctx.createLinearGradient(pipe.x - capOv, 0, pipe.x + PIPE_WIDTH + capOv, 0);
-      capGrad.addColorStop(0, "#5aad1e");
-      capGrad.addColorStop(0.12, "#82d44a");
-      capGrad.addColorStop(0.4, "#72c438");
-      capGrad.addColorStop(0.85, "#59a81d");
-      capGrad.addColorStop(1, "#4a8f16");
-      ctx.fillStyle = capGrad;
-      roundRect(ctx, pipe.x - capOv, pipe.topH - capH, PIPE_WIDTH + capOv * 2, capH, r);
-      ctx.fill();
-
-      // Cap highlight
-      ctx.fillStyle = "rgba(255,255,255,0.18)";
-      ctx.fillRect(pipe.x - capOv + 4, pipe.topH - capH + 3, 6, capH - 6);
-
-      // Outlines
-      ctx.strokeStyle = "rgba(40, 80, 15, 0.6)";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(pipe.x, 0, PIPE_WIDTH, pipe.topH - capH);
-      roundRect(ctx, pipe.x - capOv, pipe.topH - capH, PIPE_WIDTH + capOv * 2, capH, r);
-      ctx.stroke();
-
-      // --- Bottom pipe ---
+      // Bottom pipe cap
       const bottomY = pipe.topH + PIPE_GAP;
-      ctx.fillStyle = bodyGrad;
-      ctx.fillRect(pipe.x, bottomY + capH, PIPE_WIDTH, groundY - bottomY - capH);
-
-      ctx.fillStyle = "rgba(255,255,255,0.12)";
-      ctx.fillRect(pipe.x + 4, bottomY + capH, 6, groundY - bottomY - capH);
-      ctx.fillStyle = "rgba(0,0,0,0.1)";
-      ctx.fillRect(pipe.x + PIPE_WIDTH - 6, bottomY + capH, 6, groundY - bottomY - capH);
-
-      ctx.fillStyle = capGrad;
-      roundRect(ctx, pipe.x - capOv, bottomY, PIPE_WIDTH + capOv * 2, capH, r);
-      ctx.fill();
-
-      ctx.fillStyle = "rgba(255,255,255,0.18)";
-      ctx.fillRect(pipe.x - capOv + 4, bottomY + 3, 6, capH - 6);
-
-      ctx.strokeStyle = "rgba(40, 80, 15, 0.6)";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(pipe.x, bottomY + capH, PIPE_WIDTH, groundY - bottomY - capH);
-      roundRect(ctx, pipe.x - capOv, bottomY, PIPE_WIDTH + capOv * 2, capH, r);
-      ctx.stroke();
+      drawPipeSection(ctx, pipe.x - capOv, bottomY, PIPE_WIDTH + capOv * 2, capH, true);
+      // Bottom pipe body
+      drawPipeSection(ctx, pipe.x, bottomY + capH, PIPE_WIDTH, groundY - bottomY - capH, false);
     };
 
     const roundRect = (ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) => {
@@ -357,11 +343,40 @@ export function FlappyGame() {
       ctx.closePath();
     };
 
+    // Pixel-art bird sprite
+    const birdSprite: string[][] = [
+      // 12 cols x 9 rows, colors: Y=yellow, O=orange, W=white, B=black, K=dark, E=eye-white, b=beak, L=light yellow
+      ["","","","Y","Y","Y","","","","","",""],
+      ["","","Y","Y","L","L","Y","","","E","E",""],
+      ["","Y","L","L","L","Y","Y","Y","E","E","W","E"],
+      ["Y","Y","L","Y","Y","Y","b","b","E","B","B","E"],
+      ["Y","Y","Y","Y","Y","b","b","b","b","b","b",""],
+      ["","K","K","K","Y","Y","b","K","b","b","",""],
+      ["","","K","K","K","Y","Y","b","b","","",""],
+      ["","","","K","Y","Y","Y","","","","",""],
+      ["","","","","Y","Y","","","","","",""],
+    ];
+    const birdWingUp: string[][] = [
+      ["","","","Y","Y","Y","","","","","",""],
+      ["","K","Y","Y","L","L","Y","","","E","E",""],
+      ["K","K","K","L","L","Y","Y","Y","E","E","W","E"],
+      ["","K","L","Y","Y","Y","b","b","E","B","B","E"],
+      ["","Y","Y","Y","Y","b","b","b","b","b","b",""],
+      ["","","Y","Y","Y","Y","b","K","b","b","",""],
+      ["","","","Y","Y","Y","Y","b","b","","",""],
+      ["","","","","Y","Y","Y","","","","",""],
+      ["","","","","","Y","","","","","",""],
+    ];
+    const colorMap: Record<string, string> = {
+      Y: "#f8c53a", L: "#fae48b", O: "#e8a825", W: "#ffffff", B: "#1a1a2e",
+      K: "#d49a18", E: "#ffffff", b: "#e8652a",
+    };
+    const deadEyeColor = "#333";
+
     const drawBird = (ctx: CanvasRenderingContext2D, x: number, y: number, velocity: number, flapFrame: number, isDead: boolean) => {
       ctx.save();
-      ctx.translate(x, y);
+      ctx.translate(snap(x), snap(y));
 
-      // Rotation
       let angle: number;
       if (isDead) {
         angle = Math.min(game.current.deadTimer * 0.08, Math.PI / 2);
@@ -371,108 +386,47 @@ export function FlappyGame() {
       }
       ctx.rotate(angle);
 
-      // Shadow under bird
-      ctx.fillStyle = "rgba(0,0,0,0.1)";
-      ctx.beginPath();
-      ctx.ellipse(2, 3, BIRD_W / 2 - 2, BIRD_H / 2 - 3, 0, 0, Math.PI * 2);
-      ctx.fill();
+      const sprite = flapFrame < 5 ? birdWingUp : birdSprite;
+      const cols = sprite[0].length;
+      const rows = sprite.length;
+      const ox = -(cols * P) / 2;
+      const oy = -(rows * P) / 2;
 
-      // Body
-      const bodyGrad = ctx.createRadialGradient(-3, -3, 2, 0, 0, BIRD_W / 2);
-      bodyGrad.addColorStop(0, "#ffe066");
-      bodyGrad.addColorStop(0.6, "#f8c53a");
-      bodyGrad.addColorStop(1, "#e6a817");
-      ctx.fillStyle = bodyGrad;
-      ctx.beginPath();
-      ctx.ellipse(0, 0, BIRD_W / 2, BIRD_H / 2, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Body outline
-      ctx.strokeStyle = "rgba(180, 120, 20, 0.5)";
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-
-      // Belly
-      ctx.fillStyle = "rgba(255, 240, 180, 0.6)";
-      ctx.beginPath();
-      ctx.ellipse(2, 4, BIRD_W / 3.5, BIRD_H / 4, 0.1, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Wing
-      const wingAngle = flapFrame < 5 ? -0.3 : 0.15;
-      const wingY = flapFrame < 5 ? -5 : 3;
-      ctx.save();
-      ctx.translate(-3, wingY);
-      ctx.rotate(wingAngle);
-      const wingGrad = ctx.createRadialGradient(0, 0, 1, 0, 0, 10);
-      wingGrad.addColorStop(0, "#f0c040");
-      wingGrad.addColorStop(1, "#d49a18");
-      ctx.fillStyle = wingGrad;
-      ctx.beginPath();
-      ctx.ellipse(0, 0, 11, 7, -0.1, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = "rgba(180, 120, 20, 0.4)";
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      ctx.restore();
-
-      // Eye white
-      ctx.fillStyle = "#fff";
-      ctx.beginPath();
-      ctx.ellipse(8, -4, 6.5, 6.5, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = "rgba(80, 60, 30, 0.3)";
-      ctx.lineWidth = 1;
-      ctx.stroke();
-
-      // Pupil — looks forward when alive, X when dead
-      if (isDead) {
-        ctx.strokeStyle = "#333";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(6, -6); ctx.lineTo(10, -2);
-        ctx.moveTo(10, -6); ctx.lineTo(6, -2);
-        ctx.stroke();
-      } else {
-        ctx.fillStyle = "#1a1a2e";
-        ctx.beginPath();
-        ctx.ellipse(10, -3.5, 3, 3.5, 0, 0, Math.PI * 2);
-        ctx.fill();
-        // Eye shine
-        ctx.fillStyle = "#fff";
-        ctx.beginPath();
-        ctx.arc(11, -5, 1.2, 0, Math.PI * 2);
-        ctx.fill();
+      // Outline / shadow pass
+      ctx.fillStyle = "rgba(80, 50, 10, 0.35)";
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (sprite[r][c]) {
+            ctx.fillRect(ox + c * P - 1, oy + r * P + 1, P + 2, P + 2);
+          }
+        }
       }
 
-      // Beak
-      ctx.fillStyle = "#e8652a";
-      ctx.beginPath();
-      ctx.moveTo(12, -1);
-      ctx.quadraticCurveTo(23, -3, 22, 1);
-      ctx.quadraticCurveTo(23, 5, 12, 5);
-      ctx.closePath();
-      ctx.fill();
-      ctx.strokeStyle = "rgba(160, 60, 20, 0.5)";
-      ctx.lineWidth = 1;
-      ctx.stroke();
+      // Color pass
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const ch = sprite[r][c];
+          if (!ch) continue;
+          if (isDead && ch === "B") {
+            // X eyes
+            ctx.fillStyle = deadEyeColor;
+          } else {
+            ctx.fillStyle = colorMap[ch] || "#f8c53a";
+          }
+          ctx.fillRect(ox + c * P, oy + r * P, P, P);
+        }
+      }
 
-      // Beak divider
-      ctx.strokeStyle = "rgba(160, 60, 20, 0.4)";
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(12, 2);
-      ctx.quadraticCurveTo(18, 1.5, 22, 1);
-      ctx.stroke();
-
-      // Lower beak slightly lighter
-      ctx.fillStyle = "#f07030";
-      ctx.beginPath();
-      ctx.moveTo(12, 2);
-      ctx.quadraticCurveTo(18, 1.5, 22, 1);
-      ctx.quadraticCurveTo(23, 5, 12, 5);
-      ctx.closePath();
-      ctx.fill();
+      // Dead X eyes overlay
+      if (isDead) {
+        ctx.fillStyle = deadEyeColor;
+        // X pattern over eye area
+        ctx.fillRect(ox + 9 * P, oy + 2 * P, P, P);
+        ctx.fillRect(ox + 11 * P, oy + 2 * P, P, P);
+        ctx.fillRect(ox + 10 * P, oy + 3 * P, P, P);
+        ctx.fillRect(ox + 9 * P, oy + 4 * P, P, P);
+        ctx.fillRect(ox + 11 * P, oy + 4 * P, P, P);
+      }
 
       ctx.restore();
     };
@@ -487,9 +441,9 @@ export function FlappyGame() {
         const alpha = p.life / p.maxLife;
         ctx.globalAlpha = alpha;
         ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
-        ctx.fill();
+        // Square particles for pixel look
+        const s = snap(p.size * alpha * 2) || P;
+        ctx.fillRect(snap(p.x) - s / 2, snap(p.y) - s / 2, s, s);
       }
       ctx.globalAlpha = 1;
     };
@@ -498,38 +452,55 @@ export function FlappyGame() {
       if (score < 5) return;
       const isGold = score >= 40;
       const isSilver = score >= 20;
-      const baseColor = isGold ? "#ffd700" : isSilver ? "#c0c0c0" : "#cd7f32";
-      const highlight = isGold ? "#fff4a3" : isSilver ? "#e8e8e8" : "#e0a060";
-      const shadow = isGold ? "#b8960a" : isSilver ? "#888" : "#8a5520";
 
-      // Medal circle
-      const grad = ctx.createRadialGradient(cx - 4, cy - 4, 2, cx, cy, 20);
-      grad.addColorStop(0, highlight);
-      grad.addColorStop(0.6, baseColor);
-      grad.addColorStop(1, shadow);
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(cx, cy, 18, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = shadow;
-      ctx.lineWidth = 2;
-      ctx.stroke();
+      // Blocky medal — pixel circle approximation
+      const base = isGold ? "#ffd700" : isSilver ? "#c0c0c0" : "#cd7f32";
+      const hi = isGold ? "#fff4a3" : isSilver ? "#e8e8e8" : "#e0a060";
+      const sh = isGold ? "#b8960a" : isSilver ? "#888" : "#8a5520";
 
-      // Star — draw a 5-pointed star with pixels
-      const starColor = isGold ? "#fff" : "rgba(255,255,255,0.8)";
-      const sp = 2; // pixel size
-      const starPattern = [
-        [0,0,1,0,0],
-        [0,1,1,1,0],
-        [1,1,1,1,1],
-        [0,1,1,1,0],
-        [0,1,0,1,0],
+      // 9x9 pixel circle pattern
+      const medalPattern = [
+        [0,0,1,1,1,1,1,0,0],
+        [0,1,1,1,1,1,1,1,0],
+        [1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1],
+        [0,1,1,1,1,1,1,1,0],
+        [0,0,1,1,1,1,1,0,0],
       ];
-      ctx.fillStyle = starColor;
+      const mp = P;
+      const ox = cx - (9 * mp) / 2;
+      const oy = cy - (9 * mp) / 2;
+
+      for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 9; c++) {
+          if (!medalPattern[r][c]) continue;
+          ctx.fillStyle = c < 3 ? hi : c > 5 ? sh : base;
+          ctx.fillRect(ox + c * mp, oy + r * mp, mp, mp);
+        }
+      }
+      // Outline
+      ctx.strokeStyle = sh;
+      ctx.lineWidth = 1;
+
+      // Star inside
+      const starPattern = [
+        [0,0,0,1,0,0,0],
+        [0,0,1,1,1,0,0],
+        [1,1,1,1,1,1,1],
+        [0,1,1,1,1,1,0],
+        [0,0,1,0,1,0,0],
+        [0,1,0,0,0,1,0],
+      ];
+      ctx.fillStyle = isGold ? "#fff" : "rgba(255,255,255,0.85)";
+      const sox = cx - (7 * mp) / 2;
+      const soy = cy - (6 * mp) / 2;
       for (let r = 0; r < starPattern.length; r++) {
         for (let c = 0; c < starPattern[r].length; c++) {
           if (starPattern[r][c]) {
-            ctx.fillRect(cx - 5 * sp / 2 + c * sp, cy - 5 * sp / 2 + r * sp, sp, sp);
+            ctx.fillRect(sox + c * mp, soy + r * mp, mp, mp);
           }
         }
       }
