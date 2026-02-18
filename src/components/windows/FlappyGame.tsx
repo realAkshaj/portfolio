@@ -343,51 +343,76 @@ export function FlappyGame() {
       ctx.closePath();
     };
 
-    // Pixel-art bird — 2px pixel size for more detail, still chunky
-    const BP = 2; // bird pixel size
+    // Pixel-art bird — classic Flappy Bird icon style
+    // 3px pixel size: chunky but detailed enough for clear features
+    const BP = 3;
 
-    // Color key: Y=yellow, L=light, D=dark gold, W=white, B=black pupil,
-    // G=eye outline, b=beak orange, r=beak red/dark, T=tail dark, S=shine
+    // Color palette matching the iconic Flappy Bird
     const cm: Record<string, string> = {
-      Y: "#f8c53a", L: "#fae48b", D: "#d49a18", W: "#ffffff", B: "#1a1a2e",
-      G: "#555544", b: "#e8652a", r: "#c44a18", T: "#c8960f", S: "#fff8dd",
-      O: "#2d2010",  // outline
+      // Outlines
+      O: "#523a07",   // dark brown outline
+      // Body
+      Y: "#f8c53a",   // main yellow
+      L: "#fae48b",   // light yellow highlight
+      D: "#dca817",   // darker yellow shadow
+      // Eye
+      W: "#ffffff",   // eye white
+      B: "#000000",   // pupil black
+      S: "#ffffff",   // eye shine
+      // Beak
+      R: "#e8652a",   // beak red-orange
+      r: "#c44a18",   // beak dark bottom
+      // Wing
+      K: "#e8a825",   // wing color
+      k: "#c89020",   // wing shadow
     };
 
-    // Wing-down (neutral) — 17 cols x 14 rows
-    const birdDown = [
-      "     YYYY        ",
-      "   YYLLLLYY      ",
-      "  YLLLLLLYYY WWWW ",
-      " YLLLLLLYYYWWWWGW ",
-      " YLLLYYYYYYWWBBBW ",
-      "YYYYYYYYYYY WBBBG ",
-      "YYYYYYYYbbbbbWGG  ",
-      "YDDDDYYbbbbbbb    ",
-      " DDDDYYYbbrbbb    ",
-      "  DDDYYYYbbbb     ",
-      "   DDYYYYYb       ",
-      "    TYYYY         ",
-      "     YYY          ",
-      "      Y           ",
+    // Classic round Flappy Bird — 16 cols x 12 rows
+    // Matching the icon: round body, big white eye on right side,
+    // beak pointing right, small wing on left side
+    const birdMid = [
+      "    OOOOO       ",
+      "  OOLLLLOO      ",
+      " OLLLLLLYOOWWWO ",
+      " OLLLYYYYOWWWWO ",
+      "OYLLYYYYYO WBBO ",
+      "OYYYYYYYY OWBSO ",
+      "OYYYYYYYORRrOWO ",
+      "OkkYYYYORRRRrO  ",
+      "OkkkYYYO RRrO   ",
+      " OkkYYYOO OO    ",
+      "  OOYYYOO       ",
+      "    OOOOO       ",
     ];
 
-    // Wing-up — same grid, wing pixels shifted up
-    const birdUp = [
-      "     YYYY        ",
-      "  DDYLLLYY       ",
-      " DDDLLLLLYYYwWWW ",
-      " DDDLLLLYYYSWWGW ",
-      "  DYLLYYYYYWWBBBW ",
-      "YYYYYYYYYYY WBBBG ",
-      "YYYYYYYYbbbbbWGG  ",
-      " YYYYYYbbbbbbb    ",
-      "  YYYYYYbbrbbb    ",
-      "   YYYYYYbbbb     ",
-      "    YYYYY b       ",
-      "     YYYY         ",
-      "      YY          ",
-      "       Y          ",
+    const birdWingDown = [
+      "    OOOOO       ",
+      "  OOLLLLOO      ",
+      " OLLLLLLYOOWWWO ",
+      " OLLLYYYYOWWWWO ",
+      "OYLLYYYYYO WBBO ",
+      "OYYYYYYYY OWBSO ",
+      "OYYYYYYYORRrOWO ",
+      "OYYYYYYORRRRrO  ",
+      " OKKYYYo RRrO   ",
+      "  OkkYYOO OO    ",
+      "   OOYYOO       ",
+      "    OOOOO       ",
+    ];
+
+    const birdWingUp = [
+      "    OOOOO       ",
+      " OkkLLLLOO      ",
+      " OKKLLLLYOoWWWO ",
+      "  OLLLYYYYOWWWWO",
+      " OYLLYYYYYO WBBO",
+      "OYYYYYYYY OWBSO ",
+      "OYYYYYYYORRrOWO ",
+      "OYYYYYYORRRRrO  ",
+      " OYYYYYo RRrO   ",
+      "  OOYYyOO OO    ",
+      "   OOYOOO       ",
+      "    OOOOO       ",
     ];
 
     const parseSpriteRow = (row: string): string[] => row.split("");
@@ -400,30 +425,20 @@ export function FlappyGame() {
       if (isDead) {
         angle = Math.min(game.current.deadTimer * 0.08, Math.PI / 2);
       } else {
-        angle = velocity * 0.055;
-        angle = Math.max(-0.45, Math.min(angle, 1.3));
+        angle = velocity * 0.06;
+        angle = Math.max(-0.4, Math.min(angle, 1.2));
       }
       ctx.rotate(angle);
 
-      const sprite = flapFrame < 5 ? birdUp : birdDown;
+      // Pick frame: cycle through 3 wing positions
+      const wingCycle = flapFrame % 15;
+      const sprite = wingCycle < 5 ? birdWingUp : wingCycle < 10 ? birdMid : birdWingDown;
       const rows = sprite.length;
       const cols = sprite[0].length;
       const ox = -(cols * BP) / 2;
       const oy = -(rows * BP) / 2;
 
-      // Outline pass — dark border around all filled pixels
-      for (let r = 0; r < rows; r++) {
-        const pixels = parseSpriteRow(sprite[r]);
-        for (let c = 0; c < pixels.length; c++) {
-          const ch = pixels[c];
-          if (ch && ch !== " ") {
-            ctx.fillStyle = "rgba(45, 32, 16, 0.45)";
-            ctx.fillRect(ox + c * BP - 1, oy + r * BP + 1, BP + 2, BP + 2);
-          }
-        }
-      }
-
-      // Color pass
+      // Draw each pixel
       for (let r = 0; r < rows; r++) {
         const pixels = parseSpriteRow(sprite[r]);
         for (let c = 0; c < pixels.length; c++) {
@@ -436,22 +451,17 @@ export function FlappyGame() {
         }
       }
 
-      // Dead — draw X over eye area
+      // Dead eyes — X over the eye area
       if (isDead) {
-        ctx.fillStyle = "#333";
-        // Small X marks over the eye whites
-        const ex = ox + 14 * BP;
+        ctx.fillStyle = "#523a07";
+        const ex = ox + 11 * BP;
         const ey = oy + 3 * BP;
+        // X pattern
         ctx.fillRect(ex, ey, BP, BP);
         ctx.fillRect(ex + 2 * BP, ey, BP, BP);
         ctx.fillRect(ex + BP, ey + BP, BP, BP);
         ctx.fillRect(ex, ey + 2 * BP, BP, BP);
         ctx.fillRect(ex + 2 * BP, ey + 2 * BP, BP, BP);
-        // Second X
-        const ex2 = ox + 14 * BP;
-        const ey2 = oy + 4 * BP;
-        ctx.fillRect(ex2, ey2 + BP, BP, BP);
-        ctx.fillRect(ex2 + 2 * BP, ey2 + BP, BP, BP);
       }
 
       ctx.restore();
@@ -547,7 +557,7 @@ export function FlappyGame() {
         if (g.velocity > MAX_FALL_SPEED) g.velocity = MAX_FALL_SPEED;
         g.birdY += g.velocity;
         g.frameCount++;
-        g.flapFrame = (g.flapFrame + 1) % 10;
+        g.flapFrame = (g.flapFrame + 1) % 15;
         g.groundX = (g.groundX + GROUND_SPEED) % 18;
 
         // Spawn pipes
@@ -622,7 +632,7 @@ export function FlappyGame() {
 
       if (g.state === "idle") {
         g.birdY = groundY * 0.4 + Math.sin(Date.now() / 300) * 10;
-        g.flapFrame = Math.floor(Date.now() / 120) % 10;
+        g.flapFrame = Math.floor(Date.now() / 120) % 15;
         g.groundX = (Date.now() / 12) % 18;
       }
 
