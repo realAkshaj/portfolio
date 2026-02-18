@@ -343,35 +343,54 @@ export function FlappyGame() {
       ctx.closePath();
     };
 
-    // Pixel-art bird sprite
-    const birdSprite: string[][] = [
-      // 12 cols x 9 rows, colors: Y=yellow, O=orange, W=white, B=black, K=dark, E=eye-white, b=beak, L=light yellow
-      ["","","","Y","Y","Y","","","","","",""],
-      ["","","Y","Y","L","L","Y","","","E","E",""],
-      ["","Y","L","L","L","Y","Y","Y","E","E","W","E"],
-      ["Y","Y","L","Y","Y","Y","b","b","E","B","B","E"],
-      ["Y","Y","Y","Y","Y","b","b","b","b","b","b",""],
-      ["","K","K","K","Y","Y","b","K","b","b","",""],
-      ["","","K","K","K","Y","Y","b","b","","",""],
-      ["","","","K","Y","Y","Y","","","","",""],
-      ["","","","","Y","Y","","","","","",""],
-    ];
-    const birdWingUp: string[][] = [
-      ["","","","Y","Y","Y","","","","","",""],
-      ["","K","Y","Y","L","L","Y","","","E","E",""],
-      ["K","K","K","L","L","Y","Y","Y","E","E","W","E"],
-      ["","K","L","Y","Y","Y","b","b","E","B","B","E"],
-      ["","Y","Y","Y","Y","b","b","b","b","b","b",""],
-      ["","","Y","Y","Y","Y","b","K","b","b","",""],
-      ["","","","Y","Y","Y","Y","b","b","","",""],
-      ["","","","","Y","Y","Y","","","","",""],
-      ["","","","","","Y","","","","","",""],
-    ];
-    const colorMap: Record<string, string> = {
-      Y: "#f8c53a", L: "#fae48b", O: "#e8a825", W: "#ffffff", B: "#1a1a2e",
-      K: "#d49a18", E: "#ffffff", b: "#e8652a",
+    // Pixel-art bird — 2px pixel size for more detail, still chunky
+    const BP = 2; // bird pixel size
+
+    // Color key: Y=yellow, L=light, D=dark gold, W=white, B=black pupil,
+    // G=eye outline, b=beak orange, r=beak red/dark, T=tail dark, S=shine
+    const cm: Record<string, string> = {
+      Y: "#f8c53a", L: "#fae48b", D: "#d49a18", W: "#ffffff", B: "#1a1a2e",
+      G: "#555544", b: "#e8652a", r: "#c44a18", T: "#c8960f", S: "#fff8dd",
+      O: "#2d2010",  // outline
     };
-    const deadEyeColor = "#333";
+
+    // Wing-down (neutral) — 17 cols x 14 rows
+    const birdDown = [
+      "     YYYY        ",
+      "   YYLLLLYY      ",
+      "  YLLLLLLYYY WWWW ",
+      " YLLLLLLYYYWWWWGW ",
+      " YLLLYYYYYYWWBBBW ",
+      "YYYYYYYYYYY WBBBG ",
+      "YYYYYYYYbbbbbWGG  ",
+      "YDDDDYYbbbbbbb    ",
+      " DDDDYYYbbrbbb    ",
+      "  DDDYYYYbbbb     ",
+      "   DDYYYYYb       ",
+      "    TYYYY         ",
+      "     YYY          ",
+      "      Y           ",
+    ];
+
+    // Wing-up — same grid, wing pixels shifted up
+    const birdUp = [
+      "     YYYY        ",
+      "  DDYLLLYY       ",
+      " DDDLLLLLYYYwWWW ",
+      " DDDLLLLYYYSWWGW ",
+      "  DYLLYYYYYWWBBBW ",
+      "YYYYYYYYYYY WBBBG ",
+      "YYYYYYYYbbbbbWGG  ",
+      " YYYYYYbbbbbbb    ",
+      "  YYYYYYbbrbbb    ",
+      "   YYYYYYbbbb     ",
+      "    YYYYY b       ",
+      "     YYYY         ",
+      "      YY          ",
+      "       Y          ",
+    ];
+
+    const parseSpriteRow = (row: string): string[] => row.split("");
 
     const drawBird = (ctx: CanvasRenderingContext2D, x: number, y: number, velocity: number, flapFrame: number, isDead: boolean) => {
       ctx.save();
@@ -386,46 +405,53 @@ export function FlappyGame() {
       }
       ctx.rotate(angle);
 
-      const sprite = flapFrame < 5 ? birdWingUp : birdSprite;
-      const cols = sprite[0].length;
+      const sprite = flapFrame < 5 ? birdUp : birdDown;
       const rows = sprite.length;
-      const ox = -(cols * P) / 2;
-      const oy = -(rows * P) / 2;
+      const cols = sprite[0].length;
+      const ox = -(cols * BP) / 2;
+      const oy = -(rows * BP) / 2;
 
-      // Outline / shadow pass
-      ctx.fillStyle = "rgba(80, 50, 10, 0.35)";
+      // Outline pass — dark border around all filled pixels
       for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          if (sprite[r][c]) {
-            ctx.fillRect(ox + c * P - 1, oy + r * P + 1, P + 2, P + 2);
+        const pixels = parseSpriteRow(sprite[r]);
+        for (let c = 0; c < pixels.length; c++) {
+          const ch = pixels[c];
+          if (ch && ch !== " ") {
+            ctx.fillStyle = "rgba(45, 32, 16, 0.45)";
+            ctx.fillRect(ox + c * BP - 1, oy + r * BP + 1, BP + 2, BP + 2);
           }
         }
       }
 
       // Color pass
       for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const ch = sprite[r][c];
-          if (!ch) continue;
-          if (isDead && ch === "B") {
-            // X eyes
-            ctx.fillStyle = deadEyeColor;
-          } else {
-            ctx.fillStyle = colorMap[ch] || "#f8c53a";
-          }
-          ctx.fillRect(ox + c * P, oy + r * P, P, P);
+        const pixels = parseSpriteRow(sprite[r]);
+        for (let c = 0; c < pixels.length; c++) {
+          const ch = pixels[c];
+          if (!ch || ch === " ") continue;
+          const color = cm[ch];
+          if (!color) continue;
+          ctx.fillStyle = color;
+          ctx.fillRect(ox + c * BP, oy + r * BP, BP, BP);
         }
       }
 
-      // Dead X eyes overlay
+      // Dead — draw X over eye area
       if (isDead) {
-        ctx.fillStyle = deadEyeColor;
-        // X pattern over eye area
-        ctx.fillRect(ox + 9 * P, oy + 2 * P, P, P);
-        ctx.fillRect(ox + 11 * P, oy + 2 * P, P, P);
-        ctx.fillRect(ox + 10 * P, oy + 3 * P, P, P);
-        ctx.fillRect(ox + 9 * P, oy + 4 * P, P, P);
-        ctx.fillRect(ox + 11 * P, oy + 4 * P, P, P);
+        ctx.fillStyle = "#333";
+        // Small X marks over the eye whites
+        const ex = ox + 14 * BP;
+        const ey = oy + 3 * BP;
+        ctx.fillRect(ex, ey, BP, BP);
+        ctx.fillRect(ex + 2 * BP, ey, BP, BP);
+        ctx.fillRect(ex + BP, ey + BP, BP, BP);
+        ctx.fillRect(ex, ey + 2 * BP, BP, BP);
+        ctx.fillRect(ex + 2 * BP, ey + 2 * BP, BP, BP);
+        // Second X
+        const ex2 = ox + 14 * BP;
+        const ey2 = oy + 4 * BP;
+        ctx.fillRect(ex2, ey2 + BP, BP, BP);
+        ctx.fillRect(ex2 + 2 * BP, ey2 + BP, BP, BP);
       }
 
       ctx.restore();
