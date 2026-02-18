@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useCallback } from "react";
 
-// Physics
-const GRAVITY = 0.3;
-const JUMP = -6.2;
-const MAX_FALL_SPEED = 8;
+// Physics — floaty, forgiving
+const GRAVITY = 0.2;
+const JUMP = -5.0;
+const MAX_FALL_SPEED = 5.5;
 const PIPE_WIDTH = 52;
 const PIPE_GAP = 165;
 const PIPE_SPEED = 2.0;
@@ -140,102 +140,38 @@ export function FlappyGame() {
     const observer = new ResizeObserver(resizeCanvas);
     observer.observe(container);
 
-    // --- Pixel font (5x7 bitmap glyphs) ---
-    const FONT: Record<string, number[]> = {
-      "0": [0x7C,0xC6,0xCE,0xD6,0xE6,0xC6,0x7C],
-      "1": [0x30,0x70,0x30,0x30,0x30,0x30,0xFC],
-      "2": [0x78,0xCC,0x0C,0x38,0x60,0xCC,0xFC],
-      "3": [0x78,0xCC,0x0C,0x38,0x0C,0xCC,0x78],
-      "4": [0x1C,0x3C,0x6C,0xCC,0xFE,0x0C,0x0C],
-      "5": [0xFC,0xC0,0xF8,0x0C,0x0C,0xCC,0x78],
-      "6": [0x38,0x60,0xC0,0xF8,0xCC,0xCC,0x78],
-      "7": [0xFC,0xCC,0x0C,0x18,0x30,0x30,0x30],
-      "8": [0x78,0xCC,0xCC,0x78,0xCC,0xCC,0x78],
-      "9": [0x78,0xCC,0xCC,0x7C,0x0C,0x18,0x70],
-      A: [0x30,0x78,0xCC,0xCC,0xFC,0xCC,0xCC],
-      B: [0xF8,0xCC,0xCC,0xF8,0xCC,0xCC,0xF8],
-      C: [0x78,0xCC,0xC0,0xC0,0xC0,0xCC,0x78],
-      D: [0xF0,0xD8,0xCC,0xCC,0xCC,0xD8,0xF0],
-      E: [0xFC,0xC0,0xC0,0xF8,0xC0,0xC0,0xFC],
-      F: [0xFC,0xC0,0xC0,0xF8,0xC0,0xC0,0xC0],
-      G: [0x78,0xCC,0xC0,0xDC,0xCC,0xCC,0x7C],
-      H: [0xCC,0xCC,0xCC,0xFC,0xCC,0xCC,0xCC],
-      I: [0xFC,0x30,0x30,0x30,0x30,0x30,0xFC],
-      J: [0x1C,0x0C,0x0C,0x0C,0xCC,0xCC,0x78],
-      K: [0xCC,0xD8,0xF0,0xE0,0xF0,0xD8,0xCC],
-      L: [0xC0,0xC0,0xC0,0xC0,0xC0,0xC0,0xFC],
-      M: [0xCC,0xEC,0xFC,0xDC,0xCC,0xCC,0xCC],
-      N: [0xCC,0xEC,0xFC,0xDC,0xCC,0xCC,0xCC],
-      O: [0x78,0xCC,0xCC,0xCC,0xCC,0xCC,0x78],
-      P: [0xF8,0xCC,0xCC,0xF8,0xC0,0xC0,0xC0],
-      Q: [0x78,0xCC,0xCC,0xCC,0xDC,0x78,0x1C],
-      R: [0xF8,0xCC,0xCC,0xF8,0xD8,0xCC,0xCC],
-      S: [0x78,0xCC,0xC0,0x78,0x0C,0xCC,0x78],
-      T: [0xFC,0x30,0x30,0x30,0x30,0x30,0x30],
-      U: [0xCC,0xCC,0xCC,0xCC,0xCC,0xCC,0x78],
-      V: [0xCC,0xCC,0xCC,0xCC,0xCC,0x78,0x30],
-      W: [0xCC,0xCC,0xCC,0xDC,0xFC,0xEC,0xCC],
-      X: [0xCC,0xCC,0x78,0x30,0x78,0xCC,0xCC],
-      Y: [0xCC,0xCC,0xCC,0x78,0x30,0x30,0x30],
-      Z: [0xFC,0x0C,0x18,0x30,0x60,0xC0,0xFC],
-      " ": [0x00,0x00,0x00,0x00,0x00,0x00,0x00],
-      "/": [0x04,0x08,0x10,0x20,0x40,0x80,0x00],
-      "!": [0x30,0x30,0x30,0x30,0x30,0x00,0x30],
-    };
+    // --- Flappy Bird font ---
+    const flappyFont = new FontFace("FlappyBird", "url(/fonts/flappy-font.ttf)");
+    let fontLoaded = false;
+    flappyFont.load().then((font) => {
+      document.fonts.add(font);
+      fontLoaded = true;
+    });
+    const ff = (size: number) =>
+      fontLoaded ? `${size}px FlappyBird` : `bold ${size}px Arial, sans-serif`;
 
-    const drawPixelChar = (
-      ctx: CanvasRenderingContext2D,
-      char: string,
-      x: number,
-      y: number,
-      scale: number,
-      fill: string,
-      outline?: string,
-    ) => {
-      const glyph = FONT[char.toUpperCase()];
-      if (!glyph) return;
-      const px = scale;
-      for (let row = 0; row < 7; row++) {
-        const bits = glyph[row];
-        for (let col = 0; col < 8; col++) {
-          if (bits & (0x80 >> col)) {
-            const bx = x + col * px;
-            const by = y + row * px;
-            if (outline) {
-              ctx.fillStyle = outline;
-              ctx.fillRect(bx - px, by, px, px);
-              ctx.fillRect(bx + px, by, px, px);
-              ctx.fillRect(bx, by - px, px, px);
-              ctx.fillRect(bx, by + px, px, px);
-            }
-            ctx.fillStyle = fill;
-            ctx.fillRect(bx, by, px, px);
-          }
-        }
-      }
-    };
-
-    const measurePixelText = (text: string, scale: number, spacing: number) => {
-      return text.length * (8 * scale + spacing) - spacing;
-    };
-
-    const drawPixelText = (
+    const drawFlappyText = (
       ctx: CanvasRenderingContext2D,
       text: string,
-      cx: number,
-      cy: number,
-      scale: number,
+      x: number,
+      y: number,
+      size: number,
       fill: string,
-      outline?: string,
-      spacing = 2,
+      outlineColor?: string,
+      outlineWidth = 4,
     ) => {
-      const totalW = measurePixelText(text, scale, spacing);
-      let x = cx - totalW / 2;
-      const y = cy - (7 * scale) / 2;
-      for (const ch of text) {
-        drawPixelChar(ctx, ch, x, y, scale, fill, outline);
-        x += 8 * scale + spacing;
+      ctx.font = ff(size);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      if (outlineColor) {
+        ctx.strokeStyle = outlineColor;
+        ctx.lineWidth = outlineWidth;
+        ctx.lineJoin = "round";
+        ctx.miterLimit = 2;
+        ctx.strokeText(text, x, y);
       }
+      ctx.fillStyle = fill;
+      ctx.fillText(text, x, y);
     };
 
     // --- Render helpers ---
@@ -542,7 +478,7 @@ export function FlappyGame() {
     };
 
     const drawScore = (ctx: CanvasRenderingContext2D, W: number, score: number) => {
-      drawPixelText(ctx, String(score), W / 2, 35, 5, "#ffffff", "#543847", 4);
+      drawFlappyText(ctx, String(score), W / 2, 42, 56, "#ffffff", "#543847", 6);
     };
 
     const drawParticles = (ctx: CanvasRenderingContext2D) => {
@@ -735,17 +671,17 @@ export function FlappyGame() {
       // Idle
       if (g.state === "idle") {
         // Title
-        drawPixelText(ctx, "FLAPPY BIRD", W / 2, H * 0.13, 4, "#f8c53a", "#543847", 3);
+        drawFlappyText(ctx, "Flappy Bird", W / 2, H * 0.14, 42, "#f8c53a", "#543847", 5);
 
         // Tap prompt
         const pulse = 0.6 + Math.sin(Date.now() / 300) * 0.4;
         ctx.globalAlpha = pulse;
-        drawPixelText(ctx, "TAP TO START", W / 2, groundY - 35, 2, "#ffffff", "#543847", 2);
+        drawFlappyText(ctx, "Tap to Start", W / 2, groundY - 35, 24, "#ffffff", "#543847", 4);
         ctx.globalAlpha = 1;
 
         // Controls hint
-        ctx.globalAlpha = 0.5;
-        drawPixelText(ctx, "SPACE / CLICK / TAP", W / 2, groundY - 12, 1, "#ffffff", undefined, 1);
+        ctx.globalAlpha = 0.55;
+        drawFlappyText(ctx, "Space / Click / Tap", W / 2, groundY - 10, 14, "#ffffff", "#543847", 2);
         ctx.globalAlpha = 1;
       }
 
@@ -761,7 +697,7 @@ export function FlappyGame() {
         ctx.globalAlpha = fadeIn;
 
         // "Game Over"
-        drawPixelText(ctx, "GAME OVER", W / 2, py - 4, 3, "#fc3e3e", "#543847", 3);
+        drawFlappyText(ctx, "Game Over", W / 2, py - 2, 36, "#fc3e3e", "#543847", 5);
 
         // Panel — rounded with border
         ctx.fillStyle = "#deb960";
@@ -775,21 +711,28 @@ export function FlappyGame() {
         ctx.fill();
 
         // Score label + value
-        drawPixelText(ctx, "SCORE", px + 100, py + 50, 2, "#ffffff", undefined, 1);
-        drawPixelText(ctx, String(g.score), px + panelW - 30, py + 50, 3, "#ffffff", "#543847", 2);
+        ctx.textAlign = "left";
+        drawFlappyText(ctx, "Score", px + 70, py + 52, 20, "#ffffff", "#8b6914", 3);
+        ctx.textAlign = "right";
+        drawFlappyText(ctx, String(g.score), px + panelW - 16, py + 52, 28, "#ffffff", "#543847", 3);
 
         // Best label + value
-        drawPixelText(ctx, "BEST", px + 104, py + 100, 2, "#ffffff", undefined, 1);
-        drawPixelText(ctx, String(g.highScore), px + panelW - 30, py + 100, 3, "#ffffff", "#543847", 2);
+        ctx.textAlign = "left";
+        drawFlappyText(ctx, "Best", px + 70, py + 100, 20, "#ffffff", "#8b6914", 3);
+        ctx.textAlign = "right";
+        drawFlappyText(ctx, String(g.highScore), px + panelW - 16, py + 100, 28, "#ffffff", "#543847", 3);
+
+        // Reset alignment
+        ctx.textAlign = "center";
 
         // Medal
-        drawMedal(ctx, px + 38, py + 80, g.score);
+        drawMedal(ctx, px + 38, py + 78, g.score);
 
         // Retry
         if (g.deadTimer > 25) {
           const pulse = 0.5 + Math.sin(Date.now() / 300) * 0.5;
           ctx.globalAlpha = fadeIn * pulse;
-          drawPixelText(ctx, "TAP TO RETRY", W / 2, py + panelH + 45, 2, "#ffffff", "#543847", 2);
+          drawFlappyText(ctx, "Tap to Retry", W / 2, py + panelH + 45, 24, "#ffffff", "#543847", 4);
         }
 
         ctx.globalAlpha = 1;
