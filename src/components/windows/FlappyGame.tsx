@@ -343,66 +343,13 @@ export function FlappyGame() {
       ctx.closePath();
     };
 
-    // Pixel-art bird — classic Flappy Bird icon style
-    const BP = 4; // 4px per pixel — chunky and visible
-
-    const cm: Record<string, string> = {
-      Y: "#f8c53a",   // main yellow body
-      L: "#fae48b",   // light yellow highlight
-      D: "#dca817",   // darker yellow underside
-      W: "#ffffff",   // eye white
-      B: "#000000",   // pupil
-      R: "#e8652a",   // beak top (red-orange)
-      r: "#cc4422",   // beak bottom (darker)
-      K: "#e0a820",   // wing mid
-      k: "#c89020",   // wing dark
-    };
-
-    // 13 cols x 10 rows — no outline baked in, outline drawn programmatically
-    const birdMid = [
-      "   YYYY      ",
-      "  LLLLYYY    ",
-      " LLLLYYYY WW ",
-      " LLYYYYYY WBW",
-      "YYYYYYYYYY WW",
-      "YYYYYYYRRRr  ",
-      "YkYYYYRRRRr  ",
-      " kkYYYY Rr   ",
-      "  DYYYYY     ",
-      "   DYYY      ",
-    ];
-
-    const birdWingDown = [
-      "   YYYY      ",
-      "  LLLLYYY    ",
-      " LLLLYYYY WW ",
-      " LLYYYYYY WBW",
-      "YYYYYYYYYY WW",
-      "YYYYYYYRRRr  ",
-      "YYYYYYRRRRr  ",
-      " YKYYYy Rr   ",
-      "  kkYYYY     ",
-      "   DYYY      ",
-    ];
-
-    const birdWingUp = [
-      "  kYYYY      ",
-      "  KLLLLYYY   ",
-      " YLLLLYYYY WW",
-      " LLYYYYYY WBW",
-      "YYYYYYYYYY WW",
-      "YYYYYYYRRRr  ",
-      "YYYYYYRRRRr  ",
-      " YYYYYy Rr   ",
-      "  DYYYYY     ",
-      "   DYYY      ",
-    ];
-
-    const parseSpriteRow = (row: string): string[] => row.split("");
+    // Bird drawn with canvas primitives — looks clean against the pixelated env
+    const BW = 36;
+    const BH = 26;
 
     const drawBird = (ctx: CanvasRenderingContext2D, x: number, y: number, velocity: number, flapFrame: number, isDead: boolean) => {
       ctx.save();
-      ctx.translate(snap(x), snap(y));
+      ctx.translate(x, y);
 
       let angle: number;
       if (isDead) {
@@ -413,46 +360,88 @@ export function FlappyGame() {
       }
       ctx.rotate(angle);
 
-      const wingCycle = flapFrame % 15;
-      const sprite = wingCycle < 5 ? birdWingUp : wingCycle < 10 ? birdMid : birdWingDown;
-      const rows = sprite.length;
-      const cols = sprite[0].length;
-      const ox = -(cols * BP) / 2;
-      const oy = -(rows * BP) / 2;
+      // Dark outline behind the whole bird
+      ctx.strokeStyle = "#523a07";
+      ctx.lineWidth = 2.5;
 
-      // 1) Dark outline pass — draw slightly larger behind each filled pixel
-      for (let r = 0; r < rows; r++) {
-        const pixels = parseSpriteRow(sprite[r]);
-        for (let c = 0; c < pixels.length; c++) {
-          if (pixels[c] && pixels[c] !== " ") {
-            ctx.fillStyle = "#523a07";
-            ctx.fillRect(ox + c * BP - 2, oy + r * BP - 2, BP + 4, BP + 4);
-          }
-        }
-      }
+      // Body
+      ctx.fillStyle = "#f8c53a";
+      ctx.beginPath();
+      ctx.ellipse(0, 0, BW / 2, BH / 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
 
-      // 2) Color pass
-      for (let r = 0; r < rows; r++) {
-        const pixels = parseSpriteRow(sprite[r]);
-        for (let c = 0; c < pixels.length; c++) {
-          const ch = pixels[c];
-          if (!ch || ch === " ") continue;
-          ctx.fillStyle = cm[ch] || "#f8c53a";
-          ctx.fillRect(ox + c * BP, oy + r * BP, BP, BP);
-        }
-      }
+      // Belly highlight
+      ctx.fillStyle = "#fae48b";
+      ctx.beginPath();
+      ctx.ellipse(-2, -4, BW / 3, BH / 3.5, -0.1, 0, Math.PI * 2);
+      ctx.fill();
 
-      // Dead eyes — X over eye
+      // Wing
+      const wingY = flapFrame % 15 < 5 ? -6 : flapFrame % 15 < 10 ? -1 : 4;
+      ctx.fillStyle = "#e0a820";
+      ctx.beginPath();
+      ctx.ellipse(-5, wingY, 11, 7, -0.15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#523a07";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Eye white
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.ellipse(9, -4, 7, 7, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#523a07";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
       if (isDead) {
-        ctx.fillStyle = "#523a07";
-        const ex = ox + 11 * BP;
-        const ey = oy + 2 * BP;
-        ctx.fillRect(ex, ey, BP, BP);
-        ctx.fillRect(ex + 2 * BP, ey, BP, BP);
-        ctx.fillRect(ex + BP, ey + BP, BP, BP);
-        ctx.fillRect(ex, ey + 2 * BP, BP, BP);
-        ctx.fillRect(ex + 2 * BP, ey + 2 * BP, BP, BP);
+        // X eyes
+        ctx.strokeStyle = "#523a07";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(6, -7); ctx.lineTo(12, -1);
+        ctx.moveTo(12, -7); ctx.lineTo(6, -1);
+        ctx.stroke();
+      } else {
+        // Pupil
+        ctx.fillStyle = "#000000";
+        ctx.beginPath();
+        ctx.ellipse(11, -3.5, 3.5, 4, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // Shine
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(12.5, -5.5, 1.5, 0, Math.PI * 2);
+        ctx.fill();
       }
+
+      // Beak — top half
+      ctx.fillStyle = "#e8652a";
+      ctx.beginPath();
+      ctx.moveTo(13, -1);
+      ctx.lineTo(24, -3);
+      ctx.lineTo(24, 2);
+      ctx.lineTo(13, 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = "#523a07";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Beak — bottom half (darker)
+      ctx.fillStyle = "#cc4422";
+      ctx.beginPath();
+      ctx.moveTo(13, 2);
+      ctx.lineTo(24, 2);
+      ctx.lineTo(24, 5);
+      ctx.lineTo(13, 5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = "#523a07";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
 
       ctx.restore();
     };
