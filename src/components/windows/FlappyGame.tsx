@@ -344,75 +344,58 @@ export function FlappyGame() {
     };
 
     // Pixel-art bird — classic Flappy Bird icon style
-    // 3px pixel size: chunky but detailed enough for clear features
-    const BP = 3;
+    const BP = 4; // 4px per pixel — chunky and visible
 
-    // Color palette matching the iconic Flappy Bird
     const cm: Record<string, string> = {
-      // Outlines
-      O: "#523a07",   // dark brown outline
-      // Body
-      Y: "#f8c53a",   // main yellow
+      Y: "#f8c53a",   // main yellow body
       L: "#fae48b",   // light yellow highlight
-      D: "#dca817",   // darker yellow shadow
-      // Eye
+      D: "#dca817",   // darker yellow underside
       W: "#ffffff",   // eye white
-      B: "#000000",   // pupil black
-      S: "#ffffff",   // eye shine
-      // Beak
-      R: "#e8652a",   // beak red-orange
-      r: "#c44a18",   // beak dark bottom
-      // Wing
-      K: "#e8a825",   // wing color
-      k: "#c89020",   // wing shadow
+      B: "#000000",   // pupil
+      R: "#e8652a",   // beak top (red-orange)
+      r: "#cc4422",   // beak bottom (darker)
+      K: "#e0a820",   // wing mid
+      k: "#c89020",   // wing dark
     };
 
-    // Classic round Flappy Bird — 16 cols x 12 rows
-    // Matching the icon: round body, big white eye on right side,
-    // beak pointing right, small wing on left side
+    // 13 cols x 10 rows — no outline baked in, outline drawn programmatically
     const birdMid = [
-      "    OOOOO       ",
-      "  OOLLLLOO      ",
-      " OLLLLLLYOOWWWO ",
-      " OLLLYYYYOWWWWO ",
-      "OYLLYYYYYO WBBO ",
-      "OYYYYYYYY OWBSO ",
-      "OYYYYYYYORRrOWO ",
-      "OkkYYYYORRRRrO  ",
-      "OkkkYYYO RRrO   ",
-      " OkkYYYOO OO    ",
-      "  OOYYYOO       ",
-      "    OOOOO       ",
+      "   YYYY      ",
+      "  LLLLYYY    ",
+      " LLLLYYYY WW ",
+      " LLYYYYYY WBW",
+      "YYYYYYYYYY WW",
+      "YYYYYYYRRRr  ",
+      "YkYYYYRRRRr  ",
+      " kkYYYY Rr   ",
+      "  DYYYYY     ",
+      "   DYYY      ",
     ];
 
     const birdWingDown = [
-      "    OOOOO       ",
-      "  OOLLLLOO      ",
-      " OLLLLLLYOOWWWO ",
-      " OLLLYYYYOWWWWO ",
-      "OYLLYYYYYO WBBO ",
-      "OYYYYYYYY OWBSO ",
-      "OYYYYYYYORRrOWO ",
-      "OYYYYYYORRRRrO  ",
-      " OKKYYYo RRrO   ",
-      "  OkkYYOO OO    ",
-      "   OOYYOO       ",
-      "    OOOOO       ",
+      "   YYYY      ",
+      "  LLLLYYY    ",
+      " LLLLYYYY WW ",
+      " LLYYYYYY WBW",
+      "YYYYYYYYYY WW",
+      "YYYYYYYRRRr  ",
+      "YYYYYYRRRRr  ",
+      " YKYYYy Rr   ",
+      "  kkYYYY     ",
+      "   DYYY      ",
     ];
 
     const birdWingUp = [
-      "    OOOOO       ",
-      " OkkLLLLOO      ",
-      " OKKLLLLYOoWWWO ",
-      "  OLLLYYYYOWWWWO",
-      " OYLLYYYYYO WBBO",
-      "OYYYYYYYY OWBSO ",
-      "OYYYYYYYORRrOWO ",
-      "OYYYYYYORRRRrO  ",
-      " OYYYYYo RRrO   ",
-      "  OOYYyOO OO    ",
-      "   OOYOOO       ",
-      "    OOOOO       ",
+      "  kYYYY      ",
+      "  KLLLLYYY   ",
+      " YLLLLYYYY WW",
+      " LLYYYYYY WBW",
+      "YYYYYYYYYY WW",
+      "YYYYYYYRRRr  ",
+      "YYYYYYRRRRr  ",
+      " YYYYYy Rr   ",
+      "  DYYYYY     ",
+      "   DYYY      ",
     ];
 
     const parseSpriteRow = (row: string): string[] => row.split("");
@@ -430,7 +413,6 @@ export function FlappyGame() {
       }
       ctx.rotate(angle);
 
-      // Pick frame: cycle through 3 wing positions
       const wingCycle = flapFrame % 15;
       const sprite = wingCycle < 5 ? birdWingUp : wingCycle < 10 ? birdMid : birdWingDown;
       const rows = sprite.length;
@@ -438,25 +420,33 @@ export function FlappyGame() {
       const ox = -(cols * BP) / 2;
       const oy = -(rows * BP) / 2;
 
-      // Draw each pixel
+      // 1) Dark outline pass — draw slightly larger behind each filled pixel
+      for (let r = 0; r < rows; r++) {
+        const pixels = parseSpriteRow(sprite[r]);
+        for (let c = 0; c < pixels.length; c++) {
+          if (pixels[c] && pixels[c] !== " ") {
+            ctx.fillStyle = "#523a07";
+            ctx.fillRect(ox + c * BP - 2, oy + r * BP - 2, BP + 4, BP + 4);
+          }
+        }
+      }
+
+      // 2) Color pass
       for (let r = 0; r < rows; r++) {
         const pixels = parseSpriteRow(sprite[r]);
         for (let c = 0; c < pixels.length; c++) {
           const ch = pixels[c];
           if (!ch || ch === " ") continue;
-          const color = cm[ch];
-          if (!color) continue;
-          ctx.fillStyle = color;
+          ctx.fillStyle = cm[ch] || "#f8c53a";
           ctx.fillRect(ox + c * BP, oy + r * BP, BP, BP);
         }
       }
 
-      // Dead eyes — X over the eye area
+      // Dead eyes — X over eye
       if (isDead) {
         ctx.fillStyle = "#523a07";
         const ex = ox + 11 * BP;
-        const ey = oy + 3 * BP;
-        // X pattern
+        const ey = oy + 2 * BP;
         ctx.fillRect(ex, ey, BP, BP);
         ctx.fillRect(ex + 2 * BP, ey, BP, BP);
         ctx.fillRect(ex + BP, ey + BP, BP, BP);
