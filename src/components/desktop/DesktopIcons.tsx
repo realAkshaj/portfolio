@@ -3,7 +3,27 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { useWindowStore, WindowId } from "@/store/window-store";
-import { desktopIcons } from "@/data/portfolio";
+import {
+  User,
+  FolderOpen,
+  Zap,
+  Briefcase,
+  GraduationCap,
+  Mail,
+  FileText,
+  Terminal,
+} from "lucide-react";
+
+const icons = [
+  { id: "about" as const, label: "About Me", icon: User },
+  { id: "projects" as const, label: "Projects", icon: FolderOpen },
+  { id: "skills" as const, label: "Skills", icon: Zap },
+  { id: "experience" as const, label: "Experience", icon: Briefcase },
+  { id: "education" as const, label: "Education", icon: GraduationCap },
+  { id: "contact" as const, label: "Contact", icon: Mail },
+  { id: "resume" as const, label: "Resume", icon: FileText },
+  { id: "terminal" as const, label: "Terminal", icon: Terminal },
+];
 
 interface IconPosition {
   x: number;
@@ -21,25 +41,23 @@ export function DesktopIcons() {
   const hasMoved = useRef(false);
   const initialized = useRef(false);
 
-  // Initialize positions once
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
     const initial: Record<string, IconPosition> = {};
-    const maxPerColumn = Math.max(1, Math.floor((window.innerHeight - 120) / 115));
-    desktopIcons.forEach((icon, i) => {
+    const maxPerColumn = Math.max(1, Math.floor((window.innerHeight - 120) / 100));
+    icons.forEach((icon, i) => {
       const col = Math.floor(i / maxPerColumn);
       const row = i % maxPerColumn;
       initial[icon.id] = {
-        x: window.innerWidth - 120 - col * 110,
-        y: 45 + row * 115,
+        x: window.innerWidth - 110 - col * 100,
+        y: 50 + row * 100,
       };
     });
     positionsRef.current = initial;
     forceRender((n) => n + 1);
   }, []);
 
-  // Deselect on background click
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (!(e.target as HTMLElement).closest(".desktop-icon")) {
@@ -50,7 +68,6 @@ export function DesktopIcons() {
     return () => document.removeEventListener("click", handleClick);
   }, []);
 
-  // Global move/end listeners — use RAF to throttle updates
   useEffect(() => {
     let rafId: number | null = null;
     let pendingX = 0;
@@ -126,17 +143,19 @@ export function DesktopIcons() {
 
   return (
     <>
-      {desktopIcons.map((icon, index) => {
+      {icons.map((icon, index) => {
         const pos = positionsRef.current[icon.id];
         if (!pos) return null;
+        const Icon = icon.icon;
+        const isSelected = selectedIcon === icon.id;
         return (
           <motion.div
             key={icon.id}
             className="desktop-icon absolute z-[100]"
             style={{ left: pos.x, top: pos.y }}
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3 + index * 0.08, duration: 0.3 }}
+            transition={{ delay: 0.3 + index * 0.06, duration: 0.3 }}
           >
             <button
               onMouseDown={(e) => {
@@ -148,16 +167,20 @@ export function DesktopIcons() {
               onClick={() => {
                 if (!hasMoved.current) setSelectedIcon(icon.id);
               }}
-              className={`flex w-[90px] flex-col items-center gap-1.5 rounded-lg p-2 transition-colors ${
-                selectedIcon === icon.id ? "bg-accent-blue/15" : "hover:bg-white/[0.06]"
+              className={`flex w-[80px] flex-col items-center gap-2 rounded-lg p-2.5 transition-colors ${
+                isSelected ? "bg-accent/[0.08]" : "hover:bg-white/[0.03]"
               }`}
             >
               <div
-                className={`flex h-14 w-14 items-center justify-center rounded-[14px] bg-gradient-to-br shadow-lg ${icon.gradient}`}
+                className={`flex h-12 w-12 items-center justify-center rounded-xl border transition-all ${
+                  isSelected
+                    ? "border-accent/20 bg-accent/[0.06] text-accent"
+                    : "border-white/[0.04] bg-white/[0.03] text-secondary"
+                }`}
               >
-                <span className="text-[28px]">{icon.emoji}</span>
+                <Icon size={22} strokeWidth={1.5} />
               </div>
-              <span className="text-center text-[11px] leading-tight text-text drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
+              <span className="text-center font-mono text-[10px] leading-tight text-secondary drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]">
                 {icon.label}
               </span>
             </button>

@@ -4,8 +4,8 @@
 
 @layer base {
   ::selection {
-    background: rgba(137, 180, 250, 0.3);
-    color: #cdd6f4;
+    background: rgba(201, 169, 110, 0.25);
+    color: #E8E4DF;
   }
 
   html, body {
@@ -15,57 +15,80 @@
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+    scrollbar-color: rgba(201, 169, 110, 0.12) transparent;
   }
 
-  *::-webkit-scrollbar { width: 6px; }
+  *::-webkit-scrollbar { width: 5px; }
   *::-webkit-scrollbar-track { background: transparent; }
-  *::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 3px; }
-  *::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.18); }
+  *::-webkit-scrollbar-thumb { background: rgba(201, 169, 110, 0.12); border-radius: 3px; }
+  *::-webkit-scrollbar-thumb:hover { background: rgba(201, 169, 110, 0.25); }
 }
+
+/* ── Wallpaper & atmosphere ─────────────────────────── */
 
 .wallpaper {
-  /* background set via inline style for dynamic wallpaper switching */
+  background: #0C0C0C;
 }
 
+/* Subtle warm radial glow */
 .wallpaper::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 30% 20%, rgba(137, 180, 250, 0.08) 0%, transparent 60%),
-    radial-gradient(ellipse at 70% 80%, rgba(203, 166, 247, 0.06) 0%, transparent 50%);
+  background:
+    radial-gradient(ellipse at 40% 30%, rgba(201, 169, 110, 0.03) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 70%, rgba(140, 120, 90, 0.02) 0%, transparent 50%);
   pointer-events: none;
 }
 
+/* Noise grain overlay */
+.wallpaper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  pointer-events: none;
+}
+
+/* Subtle dot grid */
 .wallpaper-grid {
   position: absolute;
   inset: 0;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-  background-size: 60px 60px;
+  background-image: radial-gradient(circle, rgba(201, 169, 110, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
   pointer-events: none;
 }
 
+/* ── Glass surfaces ─────────────────────────────────── */
+
 .glass {
-  background: rgba(30, 30, 46, 0.65);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(20, 20, 20, 0.7);
+  backdrop-filter: blur(24px) saturate(1.1);
+  -webkit-backdrop-filter: blur(24px) saturate(1.1);
 }
 
 .glass-heavy {
-  background: rgba(30, 30, 46, 0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(20, 20, 20, 0.92);
+  backdrop-filter: blur(24px) saturate(1.1);
+  -webkit-backdrop-filter: blur(24px) saturate(1.1);
 }
 
+/* ── Shadows ────────────────────────────────────────── */
+
 .window-shadow {
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
 .window-shadow-active {
-  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(137, 180, 250, 0.15);
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(201, 169, 110, 0.12);
 }
 
 .dock-shadow {
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }

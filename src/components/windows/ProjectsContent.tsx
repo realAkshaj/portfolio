@@ -4,39 +4,39 @@ import { motion } from "framer-motion";
 import { projects, Project } from "@/data/portfolio";
 
 const tagColorMap: Record<Project["tagColor"], string> = {
-  ai: "bg-accent-mauve/15 text-accent-mauve",
-  systems: "bg-accent-blue/15 text-accent-blue",
-  web: "bg-accent-green/15 text-accent-green",
-  security: "bg-accent-red/15 text-accent-red",
-  impact: "bg-accent-teal/15 text-accent-teal",
+  ai: "text-accent",
+  systems: "text-primary/70",
+  web: "text-semantic-green",
+  security: "text-semantic-red",
+  impact: "text-accent/80",
 };
 
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.06 } } };
-const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
+const item = { hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } };
 
 export function ProjectsContent() {
   return (
     <motion.div variants={container} initial="hidden" animate="show">
       {projects.map((project) => (
         <motion.div key={project.name} variants={item}
-          className="mb-4 cursor-default rounded-xl border border-white/[0.08] bg-white/[0.03] p-5 transition-all hover:border-accent-blue/30 hover:bg-white/[0.05]">
+          className="mb-4 cursor-default rounded-xl border-l-2 border-l-accent/30 border border-white/[0.04] bg-white/[0.02] p-5 transition-all hover:border-l-accent/60 hover:bg-white/[0.03]">
           <div className="mb-2.5 flex items-start justify-between">
-            <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-white">{project.name}</h3>
-            <span className={`rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider ${tagColorMap[project.tagColor]}`}>
+            <h3 className="font-display text-sm font-600 tracking-tight text-primary">{project.name}</h3>
+            <span className={`font-mono text-[10px] tracking-wider ${tagColorMap[project.tagColor]}`}>
               {project.tag}
             </span>
           </div>
-          <p className="mb-3 text-[13px] leading-relaxed text-text-dim">{project.description}</p>
+          <p className="mb-3 font-mono text-[12px] leading-relaxed text-secondary">{project.description}</p>
           <div className="flex items-center justify-between">
             <div className="flex flex-wrap gap-1.5">
               {project.tech.map((tech) => (
-                <span key={tech} className="rounded bg-white/[0.06] px-2 py-0.5 text-[11px] text-text-dim">{tech}</span>
+                <span key={tech} className="rounded border border-white/[0.04] bg-white/[0.02] px-2 py-0.5 font-mono text-[10px] text-tertiary">{tech}</span>
               ))}
             </div>
             {project.link && (
               <a href={project.link} target="_blank" rel="noopener noreferrer"
-                className="ml-3 shrink-0 rounded-lg border border-white/[0.08] bg-white/[0.05] px-3 py-1 text-[11px] font-medium text-accent-blue transition-all hover:border-accent-blue/40 hover:bg-accent-blue/10">
-                Live Demo &rarr;
+                className="ml-3 shrink-0 rounded-lg border border-accent/20 bg-accent/[0.04] px-3 py-1 font-mono text-[11px] text-accent transition-all hover:border-accent/40 hover:bg-accent/[0.08]">
+                View &rarr;
               </a>
             )}
           </div>

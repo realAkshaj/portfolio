@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
-import { Share_Tech_Mono, Orbitron } from "next/font/google";
+import { Syne, DM_Mono } from "next/font/google";
 import "./globals.css";
 
-const shareTech = Share_Tech_Mono({
+const syne = Syne({
   subsets: ["latin"],
-  variable: "--font-share-tech",
+  variable: "--font-syne",
   display: "swap",
-  weight: "400",
+  weight: ["400", "500", "600", "700", "800"],
 });
 
-const orbitron = Orbitron({
+const dmMono = DM_Mono({
   subsets: ["latin"],
-  variable: "--font-orbitron",
+  variable: "--font-dm-mono",
   display: "swap",
-  weight: ["400", "500", "600", "700", "800", "900"],
+  weight: ["300", "400", "500"],
 });
 
 export const metadata: Metadata = {
@@ -36,8 +36,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${shareTech.variable} ${orbitron.variable}`}>
-      <body className="font-body bg-crust text-text antialiased">
+    <html lang="en" className={`${syne.variable} ${dmMono.variable}`}>
+      <body className="font-mono bg-deep text-primary antialiased">
         {children}
       </body>
     </html>

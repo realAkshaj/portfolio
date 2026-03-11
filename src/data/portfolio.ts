@@ -90,16 +90,16 @@ export interface Skill {
 }
 
 export const skills: Skill[] = [
-  { name: "Python", level: 95, color: "#f9e2af" },
-  { name: "Java", level: 88, color: "#f38ba8" },
-  { name: "JavaScript/TypeScript", level: 90, color: "#a6e3a1" },
-  { name: "Go", level: 82, color: "#89b4fa" },
-  { name: "React / Next.js", level: 85, color: "#89dceb" },
-  { name: "AWS / Cloud", level: 88, color: "#fab387" },
-  { name: "Docker / Kubernetes", level: 80, color: "#cba6f7" },
-  { name: "PyTorch / ML", level: 85, color: "#f5c2e7" },
-  { name: "SQL / NoSQL", level: 87, color: "#94e2d5" },
-  { name: "Distributed Systems", level: 86, color: "#89b4fa" },
+  { name: "Python", level: 95, color: "#C9A96E" },
+  { name: "Java", level: 88, color: "#C9A96E" },
+  { name: "JavaScript/TypeScript", level: 90, color: "#C9A96E" },
+  { name: "Go", level: 82, color: "#C9A96E" },
+  { name: "React / Next.js", level: 85, color: "#C9A96E" },
+  { name: "AWS / Cloud", level: 88, color: "#C9A96E" },
+  { name: "Docker / Kubernetes", level: 80, color: "#C9A96E" },
+  { name: "PyTorch / ML", level: 85, color: "#C9A96E" },
+  { name: "SQL / NoSQL", level: 87, color: "#C9A96E" },
+  { name: "Distributed Systems", level: 86, color: "#C9A96E" },
 ];
 
 export const expertiseAreas: string[] = [
@@ -122,7 +122,6 @@ export interface Experience {
 }
 
 export const experiences: Experience[] = [
-  
   {
     role: "Co-Founder & Software Developer",
     company: "ESWAF Building Solutions",
@@ -136,7 +135,7 @@ export const experiences: Experience[] = [
       "Collaborated with cross-functional stakeholders through 50+ code reviews and technical design discussions, communicating architecture decisions to non-technical clients",
       "Reduced mean time to resolution from 45min to 8min by building CloudWatch monitoring dashboards and establishing incident response protocols",
     ],
-    color: "#cba6f7",
+    color: "#C9A96E",
   }
 ];
 
@@ -165,14 +164,14 @@ export const education: Education[] = [
 ];
 
 export const desktopIcons = [
-  { id: "about" as const, label: "About Me", emoji: "👤", gradient: "from-[#89b4fa] to-[#74c7ec]" },
-  { id: "projects" as const, label: "Projects", emoji: "📂", gradient: "from-[#a6e3a1] to-[#94e2d5]" },
-  { id: "skills" as const, label: "Skills", emoji: "⚡", gradient: "from-[#cba6f7] to-[#f5c2e7]" },
-  { id: "experience" as const, label: "Experience", emoji: "💼", gradient: "from-[#fab387] to-[#f9e2af]" },
-  { id: "education" as const, label: "Education", emoji: "🎓", gradient: "from-[#f38ba8] to-[#eb6f92]" },
-  { id: "contact" as const, label: "Contact", emoji: "✉️", gradient: "from-[#94e2d5] to-[#89dceb]" },
-  { id: "resume" as const, label: "Resume", emoji: "📄", gradient: "from-[#f5c2e7] to-[#cba6f7]" },
-  { id: "terminal" as const, label: "Terminal", emoji: "💻", gradient: "from-[#a6adc8] to-[#585b70]" },
+  { id: "about" as const, label: "About Me" },
+  { id: "projects" as const, label: "Projects" },
+  { id: "skills" as const, label: "Skills" },
+  { id: "experience" as const, label: "Experience" },
+  { id: "education" as const, label: "Education" },
+  { id: "contact" as const, label: "Contact" },
+  { id: "resume" as const, label: "Resume" },
+  { id: "terminal" as const, label: "Terminal" },
 ];
 
 export const dockItems = desktopIcons.map((icon) => ({ ...icon }));

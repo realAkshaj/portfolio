@@ -63,7 +63,7 @@ export function Window({ id, title, children }: WindowProps) {
 
       updateSize(id, newW, newH);
       if (dir.includes("w") || dir.includes("n")) {
-        updatePosition(id, newX, Math.max(28, newY));
+        updatePosition(id, newX, Math.max(36, newY));
       }
     };
 
@@ -109,10 +109,10 @@ export function Window({ id, title, children }: WindowProps) {
 
   const getWindowStyle = (): React.CSSProperties => {
     if (isMobile) {
-      return { left: "2%", top: "32px", width: "96%", height: "calc(100vh - 100px)", zIndex: windowState.zIndex };
+      return { left: "2%", top: "36px", width: "96%", height: "calc(100vh - 100px)", zIndex: windowState.zIndex };
     }
     if (windowState.isMaximized) {
-      return { left: 0, top: "28px", width: "100vw", height: "calc(100vh - 28px)", borderRadius: 0, zIndex: windowState.zIndex };
+      return { left: 0, top: "36px", width: "100vw", height: "calc(100vh - 36px)", borderRadius: 0, zIndex: windowState.zIndex };
     }
     return {
       left: windowState.position.x, top: windowState.position.y,
@@ -135,21 +135,20 @@ export function Window({ id, title, children }: WindowProps) {
     <AnimatePresence>
       {windowState.isOpen && (
         <motion.div
-          className={`absolute flex min-h-[200px] min-w-[320px] flex-col overflow-hidden rounded-xl border border-white/[0.08] glass-heavy ${
+          className={`absolute flex min-h-[200px] min-w-[320px] flex-col overflow-hidden rounded-xl border border-white/[0.05] glass-heavy ${
             isActive ? "window-shadow-active" : "window-shadow"
           }`}
           style={getWindowStyle()}
           onMouseDown={handleFocus}
-          initial={{ scale: 0.92, opacity: 0 }}
+          initial={{ scale: 0.96, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.92, opacity: 0 }}
-          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          exit={{ scale: 0.96, opacity: 0 }}
+          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
         >
           {/* Resize handles */}
           {showResizeHandles && (
             <>
               {(["n", "s", "e", "w", "ne", "nw", "se", "sw"] as ResizeDirection[]).map((dir) => {
-                const isCorner = dir.length === 2;
                 const base = "absolute z-10 " + cursorMap[dir];
                 let pos = "";
                 if (dir === "n") pos = "top-0 left-2 right-2 h-1.5";
@@ -174,27 +173,41 @@ export function Window({ id, title, children }: WindowProps) {
 
           {/* Title bar */}
           <div
-            className="flex h-10 shrink-0 cursor-grab items-center border-b border-white/[0.08] bg-surface-0/60 px-4 active:cursor-grabbing"
+            className="flex h-10 shrink-0 cursor-grab items-center border-b border-white/[0.04] bg-surface/60 px-4 active:cursor-grabbing"
             onMouseDown={onDragStart}
             onTouchStart={onDragStart}
             onDoubleClick={handleMaximize}
           >
-            <div className="mr-3 flex gap-[7px]">
-              <button onClick={handleClose} className="group flex h-3 w-3 items-center justify-center rounded-full bg-accent-red hover:brightness-110" aria-label="Close">
-                <span className="text-[8px] text-transparent group-hover:text-black/60">&times;</span>
+            <div className="mr-3 flex gap-2">
+              <button
+                onClick={handleClose}
+                className="group flex h-3 w-3 items-center justify-center rounded-full bg-semantic-red/80 transition-colors hover:bg-semantic-red"
+                aria-label="Close"
+              >
+                <span className="text-[8px] text-transparent group-hover:text-black/50">&times;</span>
               </button>
-              <button onClick={handleClose} className="group flex h-3 w-3 items-center justify-center rounded-full bg-accent-yellow hover:brightness-110" aria-label="Minimize">
-                <span className="text-[8px] text-transparent group-hover:text-black/60">&minus;</span>
+              <button
+                onClick={handleClose}
+                className="group flex h-3 w-3 items-center justify-center rounded-full bg-semantic-yellow/80 transition-colors hover:bg-semantic-yellow"
+                aria-label="Minimize"
+              >
+                <span className="text-[8px] text-transparent group-hover:text-black/50">&minus;</span>
               </button>
-              <button onClick={handleMaximize} className="group flex h-3 w-3 items-center justify-center rounded-full bg-accent-green hover:brightness-110" aria-label="Maximize">
-                <span className="text-[8px] text-transparent group-hover:text-black/60">+</span>
+              <button
+                onClick={handleMaximize}
+                className="group flex h-3 w-3 items-center justify-center rounded-full bg-semantic-green/80 transition-colors hover:bg-semantic-green"
+                aria-label="Maximize"
+              >
+                <span className="text-[8px] text-transparent group-hover:text-black/50">+</span>
               </button>
             </div>
-            <span className="flex-1 text-center font-display text-[13px] font-medium uppercase tracking-wider text-text-dim">{title}</span>
+            <span className="flex-1 text-center font-display text-[12px] font-500 tracking-wide text-secondary">
+              {title}
+            </span>
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6">{children}</div>
+          <div className="flex-1 overflow-y-auto p-7">{children}</div>
         </motion.div>
       )}
     </AnimatePresence>

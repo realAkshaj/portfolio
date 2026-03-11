@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { BootScreen } from "@/components/desktop/BootScreen";
-import { MatrixRain } from "@/components/desktop/MatrixRain";
 import { MenuBar } from "@/components/desktop/MenuBar";
 import { DesktopIcons } from "@/components/desktop/DesktopIcons";
 import { Dock } from "@/components/desktop/Dock";
@@ -25,7 +24,7 @@ import { useWindowStore } from "@/store/window-store";
 
 export default function Home() {
   const [cmdPaletteOpen, setCmdPaletteOpen] = useState(false);
-  const [wallpaper, setWallpaper] = useState("linear-gradient(135deg, #16213e 0%, #0f3460 40%, #533483 100%)");
+  const [wallpaper, setWallpaper] = useState("radial-gradient(ellipse at 50% 40%, #1a1612 0%, #0C0C0C 70%)");
   const { playBoot, playOpen, playClose, muted, setMuted } = useSounds();
   const booted = useWindowStore((s) => s.booted);
 
@@ -70,7 +69,7 @@ export default function Home() {
     <>
       <BootScreen />
       <div className="wallpaper fixed inset-0 overflow-hidden" style={{ background: wallpaper }}>
-        <MatrixRain />
+        <div className="wallpaper-grid" />
         <MenuBar
           onCommandPalette={openPalette}
           muted={muted}
@@ -81,8 +80,8 @@ export default function Home() {
         <DesktopWidgets />
 
         <Window id="about" title="About Me"><AboutContent /></Window>
-        <Window id="projects" title="Projects — ~/dev"><ProjectsContent /></Window>
-        <Window id="skills" title="Terminal — skills.sh"><SkillsContent /></Window>
+        <Window id="projects" title="Projects"><ProjectsContent /></Window>
+        <Window id="skills" title="Skills"><SkillsContent /></Window>
         <Window id="experience" title="Experience"><ExperienceContent /></Window>
         <Window id="education" title="Education"><EducationContent /></Window>
         <Window id="contact" title="Contact"><ContactContent /></Window>

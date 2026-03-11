@@ -67,46 +67,46 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
       {isOpen && (
         <>
           <motion.div
-            className="fixed inset-0 z-[20000] bg-black/50"
+            className="fixed inset-0 z-[20000] bg-black/60"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
           />
           <motion.div
-            className="fixed left-1/2 top-[20%] z-[20001] w-[90%] max-w-[520px] -translate-x-1/2 overflow-hidden rounded-xl border border-white/[0.1] glass-heavy window-shadow"
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="fixed left-1/2 top-[20%] z-[20001] w-[90%] max-w-[480px] -translate-x-1/2 overflow-hidden rounded-xl border border-white/[0.06] glass-heavy window-shadow"
+            initial={{ opacity: 0, y: -16, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            exit={{ opacity: 0, y: -16, scale: 0.97 }}
             transition={{ duration: 0.15 }}
           >
-            <div className="flex items-center gap-3 border-b border-white/[0.08] px-4 py-3">
-              <Search size={16} className="text-text-dim" />
+            <div className="flex items-center gap-3 border-b border-white/[0.04] px-4 py-3">
+              <Search size={15} className="text-tertiary" />
               <input
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Type a command..."
-                className="flex-1 bg-transparent text-sm text-white placeholder-text-dim outline-none"
+                className="flex-1 bg-transparent font-mono text-sm text-primary placeholder-tertiary outline-none"
               />
-              <span className="rounded border border-white/[0.1] px-1.5 py-0.5 text-[10px] text-text-dim">ESC</span>
+              <span className="rounded border border-white/[0.06] px-1.5 py-0.5 text-[10px] text-tertiary">ESC</span>
             </div>
 
-            <div className="max-h-[300px] overflow-y-auto py-2">
+            <div className="max-h-[280px] overflow-y-auto py-2">
               {filtered.length === 0 && (
-                <p className="px-4 py-6 text-center text-sm text-text-dim">No results found</p>
+                <p className="px-4 py-6 text-center font-mono text-sm text-tertiary">No results found</p>
               )}
               {filtered.map((cmd, i) => (
                 <button
                   key={cmd.id}
                   onClick={cmd.action}
                   onMouseEnter={() => setSelectedIndex(i)}
-                  className={`flex w-full items-center justify-between px-4 py-2.5 text-left text-sm transition-colors ${
-                    i === selectedIndex ? "bg-accent-blue/10 text-white" : "text-text-dim hover:text-white"
+                  className={`flex w-full items-center justify-between px-4 py-2.5 text-left font-mono text-sm transition-colors ${
+                    i === selectedIndex ? "bg-accent/[0.06] text-accent" : "text-secondary hover:text-primary"
                   }`}
                 >
                   <span>{cmd.label}</span>
-                  <span className="text-[10px] uppercase tracking-wider text-text-dim">{cmd.category}</span>
+                  <span className="text-[10px] tracking-wider text-tertiary">{cmd.category}</span>
                 </button>
               ))}
             </div>

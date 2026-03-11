@@ -14,8 +14,8 @@ const LINES = [
   { prompt: false, text: "Python, Go, Java, AWS, PyTorch, Distributed Systems" },
 ];
 
-const TYPE_SPEED = 38; // ms per character
-const LINE_PAUSE = 350; // ms pause between lines
+const TYPE_SPEED = 38;
+const LINE_PAUSE = 350;
 
 function TerminalWidget() {
   const [displayed, setDisplayed] = useState<{ prompt: boolean; text: string }[]>([]);
@@ -27,14 +27,10 @@ function TerminalWidget() {
     async function typeAll() {
       for (const line of LINES) {
         if (cancelled) return;
-        // type character by character
         for (let i = 1; i <= line.text.length; i++) {
           if (cancelled) return;
           const partial = { prompt: line.prompt, text: line.text.slice(0, i) };
-          // replace last partial or push new
-          if (result.length > 0 && result[result.length - 1].prompt === line.prompt && result[result.length - 1].text !== line.text.slice(0, i - 1 || 1)) {
-            result[result.length - 1] = partial;
-          } else if (i === 1) {
+          if (i === 1) {
             result.push(partial);
           } else {
             result[result.length - 1] = partial;
@@ -52,23 +48,20 @@ function TerminalWidget() {
   }, []);
 
   return (
-    <div
-      className="glass-heavy rounded-xl border border-white/[0.06] px-5 py-4 font-mono text-[13px] leading-relaxed select-none max-w-[520px] w-[90vw] sm:w-auto"
-    >
+    <div className="glass-heavy rounded-xl border border-white/[0.04] px-5 py-4 font-mono text-[12px] leading-relaxed select-none max-w-[480px] w-[90vw] sm:w-auto">
       {displayed.map((line, i) => (
         <div key={i} className="whitespace-pre-wrap break-words">
           {line.prompt ? (
             <>
-              <span className="text-accent-green">$</span>{" "}
-              <span className="text-accent-blue">{line.text}</span>
+              <span className="text-accent">$</span>{" "}
+              <span className="text-primary/80">{line.text}</span>
             </>
           ) : (
-            <span className="text-text-dim">{line.text}</span>
+            <span className="text-secondary">{line.text}</span>
           )}
         </div>
       ))}
-      {/* blinking cursor */}
-      <span className={`inline-block w-[8px] h-[15px] bg-accent-blue align-middle ${done ? "animate-blink" : ""}`} />
+      <span className={`inline-block w-[7px] h-[14px] bg-accent align-middle ${done ? "animate-blink" : ""}`} />
     </div>
   );
 }
@@ -85,21 +78,21 @@ const STATUS_ROWS: [string, string][] = [
 
 function StatusWidget() {
   return (
-    <div className="glass-heavy rounded-xl border border-white/[0.06] px-5 py-4 font-mono text-[13px] leading-relaxed select-none max-w-[340px] w-[90vw] sm:w-auto">
-      <div className="text-accent-blue mb-2 text-xs tracking-wider opacity-70">
+    <div className="glass-heavy rounded-xl border border-white/[0.04] px-5 py-4 font-mono text-[12px] leading-relaxed select-none max-w-[320px] w-[90vw] sm:w-auto">
+      <div className="text-accent/60 mb-2 text-[10px] tracking-wider">
         {">"} status
       </div>
       <table className="border-separate border-spacing-y-[2px]">
         <tbody>
           {STATUS_ROWS.map(([key, val]) => (
             <tr key={key}>
-              <td className="text-text-dim pr-2 whitespace-nowrap">{key}</td>
-              <td className="text-text-dim pr-2">:</td>
-              <td className="text-text whitespace-nowrap">
+              <td className="text-tertiary pr-2 whitespace-nowrap">{key}</td>
+              <td className="text-tertiary pr-2">:</td>
+              <td className="text-primary/80 whitespace-nowrap">
                 {val}
                 {key === "Status" && (
-                  <span className="relative ml-2 inline-block h-2 w-2 rounded-full bg-accent-green">
-                    <span className="absolute inset-0 rounded-full bg-accent-green animate-ping opacity-75" />
+                  <span className="relative ml-2 inline-block h-1.5 w-1.5 rounded-full bg-semantic-green">
+                    <span className="absolute inset-0 rounded-full bg-semantic-green animate-ping opacity-60" />
                   </span>
                 )}
               </td>
@@ -127,14 +120,14 @@ function MinimizableWidget({
       {minimized ? (
         <motion.button
           key="pill"
-          initial={{ opacity: 0, scale: 0.8 }}
+          initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
+          exit={{ opacity: 0, scale: 0.9 }}
           transition={{ duration: 0.2 }}
           onClick={() => setMinimized(false)}
-          className="pointer-events-auto glass-heavy rounded-lg border border-white/[0.06] px-3 py-1.5 font-mono text-[11px] text-text-dim hover:text-white hover:border-white/[0.15] transition-colors cursor-pointer"
+          className="pointer-events-auto glass-heavy rounded-lg border border-white/[0.04] px-3 py-1.5 font-mono text-[10px] text-tertiary hover:text-primary hover:border-white/[0.08] transition-colors cursor-pointer"
         >
-          {label} <span className="text-accent-blue ml-1">+</span>
+          {label} <span className="text-accent ml-1">+</span>
         </motion.button>
       ) : (
         <motion.div
@@ -147,7 +140,7 @@ function MinimizableWidget({
         >
           <button
             onClick={() => setMinimized(true)}
-            className="pointer-events-auto absolute -top-1.5 -right-1.5 z-10 flex h-5 w-5 items-center justify-center rounded-full border border-white/[0.1] bg-surface-0/80 text-[10px] text-text-dim hover:text-white hover:border-white/[0.25] transition-colors cursor-pointer"
+            className="pointer-events-auto absolute -top-1.5 -right-1.5 z-10 flex h-5 w-5 items-center justify-center rounded-full border border-white/[0.06] bg-surface/90 text-[10px] text-tertiary hover:text-primary hover:border-white/[0.12] transition-colors cursor-pointer"
             aria-label={`Minimize ${label}`}
           >
             &minus;
@@ -165,7 +158,6 @@ export function DesktopWidgets() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    // slight delay so boot screen clears first
     const t = setTimeout(() => setVisible(true), 800);
     return () => clearTimeout(t);
   }, []);

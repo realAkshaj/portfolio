@@ -12,13 +12,13 @@ interface Line {
 const NEOFETCH = `
   ▄▄▄       ██ ▄█▀  akshaj@portfolio
  ▒████▄     ██▄█▒   ──────────────────
- ▒██  ▀█▄  ▓███▄░   OS: AkshajOS v1.0
+ ▒██  ▀█▄  ▓███▄░   OS: akshaj.os v1.0
  ░██▄▄▄▄██ ▓██ █▄   Host: UIC Chicago
   ▓█   ▓██▒▒██▒ █▄  Kernel: Next.js 14
   ▒▒   ▓▒█░▒ ▒▒ ▓▒  Shell: TypeScript 5.7
    ▒   ▒▒ ░░ ░▒ ▒░  DE: React 18
    ░   ▒   ░ ░░ ░   WM: Framer Motion
-       ░  ░  ░      Theme: Catppuccin Mocha
+       ░  ░  ░      Theme: Obsidian
                      Terminal: Portfolio v1.0
                      CPU: Caffeine-powered
                      Memory: ${skills.length} skills loaded
@@ -26,7 +26,7 @@ const NEOFETCH = `
 
 export function TerminalContent() {
   const [lines, setLines] = useState<Line[]>([
-    { type: "output", text: "AkshajOS v1.0 — Type 'help' for available commands." },
+    { type: "output", text: "akshaj.os v1.0 — Type 'help' for available commands." },
     { type: "output", text: "" },
   ]);
   const [input, setInput] = useState("");
@@ -70,7 +70,7 @@ export function TerminalContent() {
         return [
           `${personalInfo.name}`,
           `${personalInfo.title}`,
-          `📍 ${personalInfo.location}`,
+          `${personalInfo.location}`,
           "",
           ...personalInfo.bio,
           "",
@@ -104,7 +104,7 @@ export function TerminalContent() {
         }
         if (arg === "projects" || arg === "projects/") {
           return projects.flatMap((p) => [
-            `▸ ${p.name} [${p.tag}]`,
+            `> ${p.name} [${p.tag}]`,
             `  ${p.description}`,
             `  Tech: ${p.tech.join(", ")}`,
             "",
@@ -112,10 +112,10 @@ export function TerminalContent() {
         }
         if (arg === "experience" || arg === "experience/") {
           return experiences.flatMap((e) => [
-            `▸ ${e.role} @ ${e.company}`,
+            `> ${e.role} @ ${e.company}`,
             `  ${e.date}${e.location ? ` — ${e.location}` : ""}`,
             `  ${e.summary}`,
-            ...e.bullets.map((b) => `    • ${b}`),
+            ...e.bullets.map((b) => `    · ${b}`),
             "",
           ]);
         }
@@ -140,7 +140,7 @@ export function TerminalContent() {
       case "history":
         return [...history.map((h, i) => `  ${i + 1}  ${h}`), ""];
       case "sudo":
-        return ["Nice try. 🔒 Permission denied: you're not root on this portfolio.", ""];
+        return ["Permission denied: you're not root on this portfolio.", ""];
       case "":
         return [];
       default:
@@ -188,7 +188,7 @@ export function TerminalContent() {
 
   return (
     <div
-      className="flex h-full flex-col font-mono text-[13px]"
+      className="flex h-full flex-col font-mono text-[12px]"
       onClick={() => inputRef.current?.focus()}
     >
       <div className="flex-1 overflow-y-auto">
@@ -196,29 +196,28 @@ export function TerminalContent() {
           <div key={i} className="whitespace-pre-wrap leading-relaxed">
             {line.type === "input" ? (
               <span>
-                <span className="text-accent-green">akshaj@portfolio</span>
-                <span className="text-text-dim">:</span>
-                <span className="text-accent-blue">~</span>
-                <span className="text-white">$ {line.text}</span>
+                <span className="text-accent">akshaj@portfolio</span>
+                <span className="text-tertiary">:</span>
+                <span className="text-accent/60">~</span>
+                <span className="text-primary/80">$ {line.text}</span>
               </span>
             ) : (
-              <span className="text-text-dim">{line.text}</span>
+              <span className="text-secondary">{line.text}</span>
             )}
           </div>
         ))}
 
-        {/* Input line */}
         <form onSubmit={handleSubmit} className="flex items-center">
-          <span className="text-accent-green">akshaj@portfolio</span>
-          <span className="text-text-dim">:</span>
-          <span className="text-accent-blue">~</span>
-          <span className="text-white">$ </span>
+          <span className="text-accent">akshaj@portfolio</span>
+          <span className="text-tertiary">:</span>
+          <span className="text-accent/60">~</span>
+          <span className="text-primary/80">$ </span>
           <input
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="flex-1 bg-transparent text-white outline-none caret-accent-blue"
+            className="flex-1 bg-transparent text-primary/80 outline-none caret-accent"
             autoComplete="off"
             spellCheck={false}
           />
